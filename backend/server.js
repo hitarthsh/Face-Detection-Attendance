@@ -1,0 +1,63 @@
+'use strict';
+
+const { createApp } = require('./modules/core/app');
+const { connectDB } = require('./config/db');
+const env = require('./config/env');
+const logger = require('./utils/logger');
+const { initDetector } = require('./utils/faceMatcher');
+
+const startServer = async () => {
+  try {
+    // 1. Connect to MongoDB
+    await connectDB();
+
+    // 2. Pre-warm face detection model
+    logger.info('Initializing face detection model...');
+    await initDetector();
+
+    // 3. Create Express app
+    const app = createApp();
+
+    // 4. Start listening
+    const server = app.listen(env.PORT, () => {
+      logger.info(`🚀 Server running on port ${env.PORT} [${env.NODE_ENV}]`);
+      logger.info(`📡 API Base: http://localhost:${env.PORT}/api`);
+    });
+
+    // ─── Graceful Shutdown ────────────────────────────────────────────────────
+    const shutdown = async (signal) => {
+      logger.info(`${signal} received. Shutting down gracefully...`);
+      server.close(async () => {
+        const { disconnectDB } = require('./config/db');
+        await disconnectDB();
+        logger.info('Server closed. Exiting process.');
+        process.exit(0);
+      });
+
+      // Force close after 10s
+      setTimeout(() => {
+        logger.error('Forced shutdown after timeout');
+        process.exit(1);
+      }, 10000);
+    };
+
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
+
+    process.on('unhandledRejection', (reason) => {
+      logger.error(`Unhandled Rejection: ${reason}`);
+    });
+
+    process.on('uncaughtException', (err) => {
+      logger.error(`Uncaught Exception: ${err.message}`, { stack: err.stack });
+      process.exit(1);
+    });
+
+    return server;
+  } catch (error) {
+    logger.error(`Failed to start server: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+startServer();
