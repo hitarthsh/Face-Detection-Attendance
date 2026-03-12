@@ -41,7 +41,7 @@ const faceDataSchema = new mongoose.Schema(
   }
 );
 
-faceDataSchema.index({ employeeId: 1 });
+
 
 const FaceData = mongoose.model('FaceData', faceDataSchema);
 module.exports = FaceData;

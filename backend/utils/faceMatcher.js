@@ -21,8 +21,11 @@ let isModelLoaded = false;
  */
 const loadDependencies = async () => {
   if (!faceapi) {
-    faceapi = require('@vladmandic/face-api');
+    faceapi = require('@vladmandic/face-api/dist/face-api.node-wasm.js');
     tf = faceapi.tf;
+    require('@tensorflow/tfjs-backend-wasm');
+    await tf.setBackend('wasm');
+    await tf.ready();
     Jimp = require('jimp');
   }
 };

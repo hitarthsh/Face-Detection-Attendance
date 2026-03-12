@@ -68,8 +68,6 @@ const employeeSchema = new mongoose.Schema(
   }
 );
 
-employeeSchema.index({ employeeId: 1 });
-employeeSchema.index({ email: 1 });
 employeeSchema.index({ department: 1 });
 employeeSchema.index({ name: 'text', employeeId: 'text' });
 
