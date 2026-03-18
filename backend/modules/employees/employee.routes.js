@@ -16,10 +16,10 @@ const validateEmployee = [
 
 router.use(authenticate);
 
-router.post('/', authorize('admin', 'manager'), validateEmployee, validate, employeeController.createEmployee);
+router.post('/', authorize('admin'), validateEmployee, validate, employeeController.createEmployee);
 router.get('/', employeeController.getAllEmployees);
 router.get('/:id', employeeController.getEmployeeById);
-router.put('/:id', authorize('admin', 'manager'), employeeController.updateEmployee);
+router.put('/:id', authorize('admin'), employeeController.updateEmployee);
 router.delete('/:id', authorize('admin'), employeeController.deleteEmployee);
 
 module.exports = router;

@@ -108,7 +108,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
         <StatCard title="Absent" value={overview?.todayAbsent ?? '—'} color="#EF4444" icon="❌" />
         <StatCard title="Total Staff" value={overview?.activeEmployees ?? '—'} color="#6C63FF" icon="👥" />
         <StatCard title="Face Registered" value={overview?.faceRegistered ?? '—'} color="#06B6D4" icon="📷" />
-        <StatCard title="Admins" value={overview?.totalUsers ?? '—'} color="#8B5CF6" icon="🔐" />
+        <StatCard title="Total Users" value={overview?.totalUsers ?? '—'} color="#8B5CF6" icon="🔐" />
       </View>
 
       {/* Quick Actions */}

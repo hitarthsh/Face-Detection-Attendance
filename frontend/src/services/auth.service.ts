@@ -10,7 +10,7 @@ export interface User {
   _id: string;
   name: string;
   email: string;
-  role: 'admin' | 'manager' | 'viewer';
+  role: 'admin';
 }
 
 export interface AuthResponse {
@@ -22,6 +22,11 @@ export interface AuthResponse {
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const { data } = await api.post('/auth/login', credentials);
+    
+    if (!data?.data) {
+      throw new Error('Invalid server response');
+    }
+
     const { user, accessToken, refreshToken } = data.data;
 
     await AsyncStorage.multiSet([

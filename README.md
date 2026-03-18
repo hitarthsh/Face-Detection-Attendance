@@ -123,7 +123,7 @@ npm run ios
 
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"name":"Admin","email":"admin@company.com","password":"SecurePass123","role":"admin"}'
+  -d '{"name":"Admin","email":"admin@company.com","password":"hitarth@11","role":"admin"}'
 ```
 
 ---

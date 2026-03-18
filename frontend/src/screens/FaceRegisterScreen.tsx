@@ -7,6 +7,7 @@ import {
   Alert,
   ActivityIndicator,
   SafeAreaView,
+  Linking,
 } from 'react-native';
 import { Camera } from 'react-native-vision-camera';
 import { useCamera } from '../hooks/useCamera';
@@ -19,8 +20,15 @@ type Props = NativeStackScreenProps<RootStackParamList, 'FaceRegister'>;
 
 const FaceRegisterScreen: React.FC<Props> = ({ navigation, route }) => {
   const { employeeId, employeeName } = route.params;
-  const { cameraRef, device, hasPermission, requestPermission, captureImage, isCapturing } =
-    useCamera();
+  const {
+    cameraRef,
+    device,
+    hasPermission,
+    permissionStatus,
+    requestPermission,
+    captureImage,
+    isCapturing,
+  } = useCamera();
   const [captureCount, setCaptureCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const REQUIRED_CAPTURES = 3;
@@ -57,12 +65,40 @@ const FaceRegisterScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   }, [loading, isCapturing, captureImage, employeeId, employeeName, navigation]);
 
+  const handleRequestPermission = useCallback(async () => {
+    const granted = await requestPermission();
+    if (!granted) {
+      const status = Camera.getCameraPermissionStatus();
+      if (status === 'denied') {
+        Alert.alert(
+          'Permission Denied',
+          'Camera access is blocked. Please enable it in your system settings to continue.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ]
+        );
+      } else {
+        Alert.alert('Permission Required', 'Camera access is necessary to register faces.');
+      }
+    }
+  }, [requestPermission]);
+
   if (!hasPermission) {
+    const isDenied = permissionStatus === 'denied';
     return (
       <View style={styles.permissionContainer}>
-        <Text style={styles.permissionText}>Camera permission required</Text>
-        <TouchableOpacity style={styles.permissionBtn} onPress={requestPermission}>
-          <Text style={styles.permissionBtnText}>Grant Permission</Text>
+        <Text style={styles.permissionIcon}>📷</Text>
+        <Text style={styles.permissionTitle}>Camera Access Required</Text>
+        <Text style={styles.permissionText}>
+          {isDenied
+            ? 'Access was previously denied. Please enable it in Settings.'
+            : 'We need camera access to register your face.'}
+        </Text>
+        <TouchableOpacity style={styles.permissionBtn} onPress={handleRequestPermission}>
+          <Text style={styles.permissionBtnText}>
+            {isDenied ? 'Open Settings' : 'Grant Permission'}
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -188,16 +224,35 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#0D0D1A',
+    padding: 40,
     gap: 16,
   },
-  permissionText: { color: '#F0F0F5', fontSize: 16 },
+  permissionIcon: { fontSize: 64, marginBottom: 10 },
+  permissionTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#fff',
+    textAlign: 'center',
+  },
+  permissionText: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 20,
+  },
   permissionBtn: {
     backgroundColor: '#6C63FF',
-    borderRadius: 12,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    borderRadius: 14,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    shadowColor: '#6C63FF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  permissionBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
+  permissionBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
 });
 
 export default FaceRegisterScreen;

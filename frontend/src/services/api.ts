@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BASE_URL = __DEV__
-  ? 'http://10.0.2.2:5000/api' // Android emulator → localhost
+  ? 'http://125.125.1.144:5000/api' // Auto-detected: 125.125.1.144
   : 'https://your-production-api.com/api';
 
 const api = axios.create({
@@ -15,20 +15,20 @@ const api = axios.create({
 
 // ─── Request Interceptor ────────────────────────────────────────────────────
 api.interceptors.request.use(
-  async (config) => {
+  async config => {
     const token = await AsyncStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  error => Promise.reject(error),
 );
 
 // ─── Response Interceptor (auto token refresh) ──────────────────────────────
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
+  response => response,
+  async error => {
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -38,7 +38,9 @@ api.interceptors.response.use(
         const refreshToken = await AsyncStorage.getItem('refreshToken');
         if (!refreshToken) throw new Error('No refresh token');
 
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
+        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
+          refreshToken,
+        });
         const { accessToken, refreshToken: newRefreshToken } = data.data;
 
         await AsyncStorage.setItem('accessToken', accessToken);
@@ -48,13 +50,16 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         // Clear tokens and force re-login
-        await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
+        // await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
+        await AsyncStorage.removeItem('accessToken');
+        await AsyncStorage.removeItem('refreshToken');
+        await AsyncStorage.removeItem('user');
         return Promise.reject(refreshError);
       }
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

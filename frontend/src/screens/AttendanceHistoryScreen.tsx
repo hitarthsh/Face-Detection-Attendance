@@ -27,24 +27,28 @@ const StatusBadge = ({ status }: { status: string }) => (
 );
 
 const AttendanceCard = ({ record }: { record: AttendanceRecord }) => {
-  const checkIn = record.checkIn?.time ? new Date(record.checkIn.time) : null;
-  const checkOut = record.checkOut?.time ? new Date(record.checkOut.time) : null;
+  const checkIn = record?.checkIn?.time ? new Date(record.checkIn.time) : null;
+  const checkOut = record?.checkOut?.time ? new Date(record.checkOut.time) : null;
+
   const formatTime = (d: Date | null) =>
     d ? d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '—';
+
+  const name = record?.employeeName || 'Unknown';
+  const firstLetter = name ? name.charAt(0).toUpperCase() : '?';
 
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <View style={styles.nameContainer}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{record.employeeName[0]}</Text>
+            <Text style={styles.avatarText}>{firstLetter}</Text>
           </View>
           <View>
-            <Text style={styles.name}>{record.employeeName}</Text>
-            <Text style={styles.dept}>{record.department}</Text>
+            <Text style={styles.name}>{name}</Text>
+            <Text style={styles.dept}>{record?.department || '—'}</Text>
           </View>
         </View>
-        <StatusBadge status={record.status} />
+        <StatusBadge status={record?.status || 'unknown'} />
       </View>
 
       <View style={styles.timeRow}>

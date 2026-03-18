@@ -1,0 +1,20 @@
+{
+  "name": "face-attendance",
+  "version": "1.0.0",
+  "description": "Full-stack Face Detection Attendance System",
+  "scripts": {
+    "connect": "node connect.js",
+    "backend:install": "cd backend && npm install",
+    "backend:dev": "cd backend && npm run dev",
+    "backend:admin": "cd backend && node setup-admin.js",
+    "frontend:install": "cd frontend && npm install",
+    "frontend:start": "cd frontend && npm start",
+    "frontend:android": "cd frontend && npm run android",
+    "frontend:ios": "cd frontend && npm run ios",
+    "install:all": "npm run backend:install && npm run frontend:install",
+    "start:all": "npx concurrently \"npm run backend:dev\" \"npm run frontend:start\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
