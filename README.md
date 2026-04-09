@@ -238,7 +238,18 @@ GET    /api/health              Server health, DB status, memory
 
 ## 🚀 Deployment
 
-### Backend — Railway / Render / VPS
+### Backend — Render (recommended)
+
+This repo includes [`render.yaml`](render.yaml) at the root: connect the repository in [Render](https://render.com/), choose **Blueprint**, and set the prompted secrets **`MONGODB_URI_PROD`** (MongoDB Atlas URI), or adjust env vars after create. The Web Service uses **`rootDir: backend`**, **`npm start`**, and health check **`/api/health`**. Default hostname matches `PRODUCTION_API_BASE_URL` in [`frontend/src/config/apiBaseUrl.ts`](frontend/src/config/apiBaseUrl.ts) (`face-attendance-api.onrender.com`); rename the service in Render and update that constant if needed.
+
+After the service is live:
+
+```bash
+npm run check:render-health
+# Or override: set RENDER_HEALTH_URL and run the same script (see scripts/check-render-health.mjs).
+```
+
+### Backend — Railway / Render (manual) / VPS
 
 ```bash
 # 1. Set environment variables on your platform

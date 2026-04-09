@@ -12,6 +12,7 @@
     "frontend:android": "cd frontend && npm run android",
     "frontend:ios": "cd frontend && npm run ios",
     "install:all": "npm run backend:install && npm run frontend:install",
+    "check:render-health": "node scripts/check-render-health.mjs",
     "start:all": "npx concurrently \"npm run backend:dev\" \"npm run frontend:start\""
   },
   "devDependencies": {

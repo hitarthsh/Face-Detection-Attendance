@@ -1,9 +1,14 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import {
+  DEVELOPMENT_API_BASE_URL,
+  PRODUCTION_API_BASE_URL,
+} from '../config/apiBaseUrl';
+
 const BASE_URL = __DEV__
-  ? 'http://125.125.1.144:5000/api' // Auto-detected: 125.125.1.144
-  : 'https://your-production-api.com/api';
+  ? DEVELOPMENT_API_BASE_URL
+  : PRODUCTION_API_BASE_URL;
 
 const api = axios.create({
   baseURL: BASE_URL,

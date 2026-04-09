@@ -9,11 +9,13 @@ const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT, 10) || 5000,
 
-  // MongoDB
+  // MongoDB — production: MONGODB_URI_PROD then MONGODB_URI; dev: MONGODB_URI then MONGODB_URI_PROD, else localhost
   MONGODB_URI:
     process.env.NODE_ENV === 'production'
-      ? process.env.MONGODB_URI_PROD
-      : process.env.MONGODB_URI || 'mongodb://localhost:27017/face_attendance',
+      ? process.env.MONGODB_URI_PROD || process.env.MONGODB_URI
+      : process.env.MONGODB_URI ||
+        process.env.MONGODB_URI_PROD ||
+        'mongodb://localhost:27017/face_attendance',
 
   // JWT
   JWT_SECRET: process.env.JWT_SECRET || 'fallback_dev_secret_change_in_prod',
