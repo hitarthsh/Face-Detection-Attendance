@@ -87,7 +87,7 @@ const EmployeeListScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#6C63FF" style={styles.loader} />
+        <ActivityIndicator size="large" color="#6b63ffd4" style={styles.loader} />
       ) : (
         <FlatList
           data={employees}
