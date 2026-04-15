@@ -25,8 +25,9 @@ out/
 *.mobileprovision
 *.orig.*
 web-build/
-android/
-ios/
+# Only ignore native folders at repo root (track frontend/android for installs)
+/android/
+/ios/
 
 # ─── Logs ────────────────────────────────────────────────────────────────────
 logs/

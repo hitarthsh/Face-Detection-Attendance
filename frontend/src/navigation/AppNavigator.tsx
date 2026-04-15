@@ -65,19 +65,35 @@ const AppNavigator = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
     const checkAuthStatus = async () => {
       try {
-        const authenticated = await authService.isAuthenticated();
-        setIsAuthenticated(authenticated);
+        const authenticated = await Promise.race([
+          authService.isAuthenticated(),
+          new Promise<boolean>((_, reject) =>
+            setTimeout(() => reject(new Error('Auth check timed out')), 8000)
+          ),
+        ]);
+        if (!cancelled) {
+          setIsAuthenticated(authenticated);
+        }
       } catch (error) {
         console.error('Auth check error:', error);
-        setIsAuthenticated(false);
+        if (!cancelled) {
+          setIsAuthenticated(false);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     checkAuthStatus();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (isLoading) {

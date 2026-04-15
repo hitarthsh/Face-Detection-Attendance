@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const env = require("./config/env");
 
-const MONGODB_URI = env.MONGODB_URI || "mongodb://localhost:27017/face_attendance";
+const MONGODB_URI = env.MONGODB_URI;
 
 async function setupAdmin() {
   try {
@@ -24,16 +24,17 @@ async function setupAdmin() {
 
     const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
-    const adminEmail = "shahh0919@gmail.com";
+    const adminEmail = "admin@company.com";
+    const adminPassword = "hitarth@11";
     const existingAdmin = await User.findOne({ email: adminEmail });
 
     if (existingAdmin) {
       console.log(`ℹ️ Admin user already exists: ${adminEmail}`);
-      const hashedPassword = await bcrypt.hash("admin@123", 12);
+      const hashedPassword = await bcrypt.hash(adminPassword, 12);
       await User.updateOne({ email: adminEmail }, { password: hashedPassword });
       console.log("✅ Admin password updated successfully!");
     } else {
-      const hashedPassword = await bcrypt.hash("admin@123", 12);
+      const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
       await User.create({
         name: "Super Admin",
@@ -45,7 +46,7 @@ async function setupAdmin() {
 
       console.log("✅ Admin user created successfully!");
       console.log(`📧 Email: ${adminEmail}`);
-      console.log("🔑 Password: admin@11");
+      console.log(`🔑 Password: ${adminPassword}`);
     }
   } catch (error) {
     console.error("❌ Error setting up admin:", error.message);
