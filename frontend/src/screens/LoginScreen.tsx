@@ -50,7 +50,13 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       await authService.login({ email: email.trim(), password });
       navigation.replace('Main');
     } catch (error: any) {
-      Alert.alert('Login Failed', error.response?.data?.message || 'Invalid credentials');
+      await authService.clearSession();
+      const apiMessage = error.response?.data?.message;
+      const message =
+        typeof apiMessage === 'string' && apiMessage.length > 0
+          ? apiMessage
+          : 'Invalid credentials';
+      Alert.alert('Login Failed', message);
     } finally {
       setLoading(false);
     }

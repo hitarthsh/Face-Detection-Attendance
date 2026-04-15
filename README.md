@@ -126,6 +126,11 @@ curl -X POST http://localhost:5000/api/auth/register \
   -d '{"name":"Admin","email":"admin@company.com","password":"hitarth@11","role":"admin"}'
 ```
 
+Default login (if you run `npm run backend:admin`):
+
+- ID/Email: `admin@company.com`
+- Password: `hitarth@11`
+
 ---
 
 ## 🔧 Environment Configuration

@@ -1,14 +1,9 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import {
-  DEVELOPMENT_API_BASE_URL,
-  PRODUCTION_API_BASE_URL,
-} from '../config/apiBaseUrl';
-
-const BASE_URL = __DEV__
-  ? DEVELOPMENT_API_BASE_URL
-  : PRODUCTION_API_BASE_URL;
+const BASE_URL =
+  (globalThis as { process?: { env?: { BASE_URL?: string } } }).process?.env?.BASE_URL ||
+  'https://face-detection-attendance-zz1n.onrender.com/api';
 
 const api = axios.create({
   baseURL: BASE_URL,

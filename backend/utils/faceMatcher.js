@@ -13,6 +13,7 @@ const env = require('../config/env');
 // Lazy-loaded modules
 let faceapi = null;
 let Jimp = null;
+let JimpLib = null;
 let tf = null;
 let isModelLoaded = false;
 
@@ -26,7 +27,8 @@ const loadDependencies = async () => {
     require('@tensorflow/tfjs-backend-wasm');
     await tf.setBackend('wasm');
     await tf.ready();
-    Jimp = require('jimp');
+    JimpLib = require('jimp');
+    Jimp = JimpLib.Jimp || JimpLib;
   }
 };
 
@@ -72,7 +74,9 @@ const loadImageAsTensor = async (imageSource) => {
 
   // Resize for performance, max 640px wide
   if (image.width > 640) {
-    image.resize(640, Jimp.AUTO);
+    const targetWidth = 640;
+    const targetHeight = Math.round((image.height * targetWidth) / image.width);
+    image.resize({ w: targetWidth, h: targetHeight });
   }
 
   const { width, height } = image;

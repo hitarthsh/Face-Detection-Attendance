@@ -20,7 +20,14 @@ export interface AuthResponse {
 }
 
 export const authService = {
+  async clearSession(): Promise<void> {
+    await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
+  },
+
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    // Ensure stale tokens from previous environments don't interfere.
+    await this.clearSession();
+
     const { data } = await api.post('/auth/login', credentials);
     
     if (!data?.data) {
@@ -42,7 +49,7 @@ export const authService = {
     try {
       await api.post('/auth/logout');
     } finally {
-      await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
+      await this.clearSession();
     }
   },
 
