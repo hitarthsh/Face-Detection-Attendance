@@ -2,13 +2,9 @@
 
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-const dotenv = require("dotenv");
-const path = require("path");
+const env = require("./config/env");
 
-// Load env
-dotenv.config({ path: path.join(__dirname, ".env") });
-
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/";
+const MONGODB_URI = env.MONGODB_URI || "mongodb://localhost:27017/face_attendance";
 
 async function setupAdmin() {
   try {

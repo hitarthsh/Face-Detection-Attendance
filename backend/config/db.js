@@ -12,10 +12,18 @@ const connectDB = async () => {
     return;
   }
 
+  if (!env.MONGODB_URI) {
+    logger.error(
+      'MongoDB URI is missing. Set one of MONGODB_URI, MONGODB_URI_PROD, or DATABASE_URL (mongo connection string) in the environment.'
+    );
+    process.exit(1);
+  }
+
   try {
     const conn = await mongoose.connect(env.MONGODB_URI, {
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 30000,
+      connectTimeoutMS: 20000,
       socketTimeoutMS: 45000,
     });
 

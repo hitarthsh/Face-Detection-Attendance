@@ -2,7 +2,7 @@
 #
 # Before first deploy:
 # 1. MongoDB Atlas — cluster + DB user; Network Access allow 0.0.0.0/0 (or lock down later).
-# 2. In Render Dashboard, set secrets when prompted: MONGODB_URI_PROD, JWT_SECRET, JWT_REFRESH_SECRET.
+# 2. In Render Dashboard, set a Mongo URI secret: MONGODB_URI_PROD (or MONGODB_URI / MONGO_URL / DATABASE_URL).
 # 3. Service URL will be https://face-attendance-api.onrender.com — update frontend/src/config/apiBaseUrl.ts if you rename the service.
 
 services:

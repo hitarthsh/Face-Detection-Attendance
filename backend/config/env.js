@@ -5,17 +5,45 @@ const path = require('path');
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
+/** Strip whitespace / wrapping quotes from dashboard secrets (Render, etc.). */
+function normalizeEnvString(value) {
+  if (value == null) return '';
+  let s = String(value).trim();
+  if (
+    (s.startsWith('"') && s.endsWith('"')) ||
+    (s.startsWith("'") && s.endsWith("'"))
+  ) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
+/**
+ * Atlas / hosted Mongo — use the first usable URI (same order dev + prod).
+ * Supports Render: MONGODB_URI_PROD, or MONGODB_URI, or Atlas-linked DATABASE_URL.
+ */
+function resolveMongoUri() {
+  const candidates = [
+    process.env.MONGODB_URI,
+    process.env.MONGODB_URI_PROD,
+    process.env.MONGO_URL,
+    process.env.DATABASE_URL,
+  ];
+  for (const raw of candidates) {
+    const s = normalizeEnvString(raw);
+    if (s.startsWith('mongodb://') || s.startsWith('mongodb+srv://')) {
+      return s;
+    }
+  }
+  const isProd = (process.env.NODE_ENV || 'development') === 'production';
+  return isProd ? '' : 'mongodb://localhost:27017/face_attendance';
+}
+
 const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT, 10) || 5000,
 
-  // MongoDB — production: MONGODB_URI_PROD then MONGODB_URI; dev: MONGODB_URI then MONGODB_URI_PROD, else localhost
-  MONGODB_URI:
-    process.env.NODE_ENV === 'production'
-      ? process.env.MONGODB_URI_PROD || process.env.MONGODB_URI
-      : process.env.MONGODB_URI ||
-        process.env.MONGODB_URI_PROD ||
-        'mongodb://localhost:27017/face_attendance',
+  MONGODB_URI: resolveMongoUri(),
 
   // JWT
   JWT_SECRET: process.env.JWT_SECRET || 'fallback_dev_secret_change_in_prod',
