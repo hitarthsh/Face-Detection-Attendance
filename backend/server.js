@@ -19,9 +19,10 @@ const startServer = async () => {
     const app = createApp();
 
     // 4. Start listening
-    const server = app.listen(env.PORT, () => {
+    const server = app.listen(env.PORT, env.HOST, () => {
       logger.info(`🚀 Server running on port ${env.PORT} [${env.NODE_ENV}]`);
-      logger.info(`📡 API Base: http://localhost:${env.PORT}/api`);
+      logger.info(`📡 API Base (localhost): http://localhost:${env.PORT}/api`);
+      logger.info(`📶 API Base (LAN): http://125.125.1.144:${env.PORT}/api`);
     });
 
     // ─── Graceful Shutdown ────────────────────────────────────────────────────

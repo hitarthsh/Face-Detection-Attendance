@@ -42,6 +42,7 @@ function resolveMongoUri() {
 const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT, 10) || 5000,
+  HOST: process.env.HOST || '0.0.0.0',
 
   MONGODB_URI: resolveMongoUri(),
 

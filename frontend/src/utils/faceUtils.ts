@@ -7,8 +7,9 @@ export const registerFaceEmbedding = async (
   employeeId: string,
   imageUri: string
 ): Promise<{ captureCount: number }> => {
+  const normalizedEmployeeId = String(employeeId || '').trim();
   const formData = new FormData();
-  formData.append('employeeId', employeeId);
+  formData.append('employeeId', normalizedEmployeeId);
   formData.append('image', {
     uri: imageUri,
     type: 'image/jpeg',
@@ -16,7 +17,12 @@ export const registerFaceEmbedding = async (
   } as any);
 
   const { data } = await api.post('/face/register', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    // Let RN/axios set multipart boundary automatically.
+    timeout: 120000,
+    headers: {
+      // Backend fallback if multipart body fields are dropped by the client stack.
+      'x-employee-id': normalizedEmployeeId,
+    },
   });
 
   return data.data;
@@ -43,7 +49,8 @@ export const verifyFaceEmbedding = async (
   } as any);
 
   const { data } = await api.post('/face/verify', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    // Face verification can take longer on cold backend instances.
+    timeout: 120000,
   });
 
   return data.data;

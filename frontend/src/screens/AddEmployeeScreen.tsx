@@ -29,8 +29,9 @@ const AddEmployeeScreen: React.FC<Props> = ({ navigation }) => {
     position: '',
   });
   const [loading, setLoading] = useState(false);
+  type FormField = keyof typeof form;
 
-  const setField = (field: string, value: string) =>
+  const setField = (field: FormField, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSubmit = async () => {
@@ -53,13 +54,23 @@ const AddEmployeeScreen: React.FC<Props> = ({ navigation }) => {
         { text: 'Done', onPress: () => navigation.goBack() },
       ]);
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Failed to add employee');
+      const rawMessage = String(error?.response?.data?.message || error?.message || '');
+      const message = rawMessage.includes("Unexpected token 'n'")
+        ? 'Server returned an invalid response. Please try again.'
+        : rawMessage || 'Failed to add employee';
+      Alert.alert('Error', message);
     } finally {
       setLoading(false);
     }
   };
 
-  const Field = ({ label, field, placeholder, keyboardType, required }: any) => (
+  const renderField = (
+    label: string,
+    field: FormField,
+    placeholder: string,
+    keyboardType: 'default' | 'email-address' | 'phone-pad' = 'default',
+    required = false
+  ) => (
     <View style={styles.fieldContainer}>
       <Text style={styles.label}>
         {label} {required && <Text style={styles.required}>*</Text>}
@@ -68,9 +79,9 @@ const AddEmployeeScreen: React.FC<Props> = ({ navigation }) => {
         style={styles.input}
         placeholder={placeholder}
         placeholderTextColor="#555"
-        value={form[field as keyof typeof form]}
+        value={form[field]}
         onChangeText={(val) => setField(field, val)}
-        keyboardType={keyboardType || 'default'}
+        keyboardType={keyboardType}
         autoCapitalize="none"
       />
     </View>
@@ -84,12 +95,12 @@ const AddEmployeeScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>Add New Employee</Text>
 
-        <Field label="Employee ID" field="employeeId" placeholder="EMP001" required />
-        <Field label="Full Name" field="name" placeholder="John Doe" required />
-        <Field label="Department" field="department" placeholder="Engineering" required />
-        <Field label="Email" field="email" placeholder="john@company.com" keyboardType="email-address" required />
-        <Field label="Phone" field="phone" placeholder="+1 234 567 8900" keyboardType="phone-pad" />
-        <Field label="Position" field="position" placeholder="Senior Developer" />
+        {renderField('Employee ID', 'employeeId', 'EMP001', 'default', true)}
+        {renderField('Full Name', 'name', 'John Doe', 'default', true)}
+        {renderField('Department', 'department', 'Engineering', 'default', true)}
+        {renderField('Email', 'email', 'john@company.com', 'email-address', true)}
+        {renderField('Phone', 'phone', '+1 234 567 8900', 'phone-pad')}
+        {renderField('Position', 'position', 'Senior Developer')}
 
         <TouchableOpacity
           style={[styles.submitBtn, loading && styles.submitBtnDisabled]}

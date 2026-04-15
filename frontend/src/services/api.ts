@@ -1,17 +1,35 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL =
-  (globalThis as { process?: { env?: { BASE_URL?: string } } }).process?.env?.BASE_URL ||
-  'https://face-detection-attendance-zz1n.onrender.com/api';
+const BASE_URLS = [
+  // Physical Android via USB (requires adb reverse tcp:10000 tcp:10000)
+  'http://localhost:10000/api',
+  // Physical Android over Wi-Fi
+  'http://125.125.1.144:10000/api',
+  // Android emulator
+  'http://10.0.2.2:10000/api',
+  // Cloud fallback
+  'https://face-detection-attendance-zz1n.onrender.com/api',
+];
+
+let baseUrlIndex = 0;
+const getCurrentBaseUrl = () => BASE_URLS[baseUrlIndex]!;
+const advanceBaseUrl = () => {
+  if (baseUrlIndex < BASE_URLS.length - 1) {
+    baseUrlIndex += 1;
+    api.defaults.baseURL = getCurrentBaseUrl();
+  }
+};
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: getCurrentBaseUrl(),
   timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
+
+if (__DEV__) {
+  // Helps verify which backend the app is actually targeting at runtime.
+  console.log('[api] active baseURL:', getCurrentBaseUrl());
+}
 
 // ─── Request Interceptor ────────────────────────────────────────────────────
 api.interceptors.request.use(
@@ -19,6 +37,17 @@ api.interceptors.request.use(
     const token = await AsyncStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // For FormData requests, let the native adapter set multipart boundary.
+    // Keeping JSON content-type here can cause backend to miss fields like employeeId.
+    if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+      if (config.headers && typeof (config.headers as any).set === 'function') {
+        (config.headers as any).set('Content-Type', undefined);
+      } else if (config.headers) {
+        delete (config.headers as any)['Content-Type'];
+        delete (config.headers as any)['content-type'];
+      }
     }
     return config;
   },
@@ -38,7 +67,7 @@ api.interceptors.response.use(
         const refreshToken = await AsyncStorage.getItem('refreshToken');
         if (!refreshToken) throw new Error('No refresh token');
 
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
+        const { data } = await axios.post(`${getCurrentBaseUrl()}/auth/refresh`, {
           refreshToken,
         });
         const { accessToken, refreshToken: newRefreshToken } = data.data;
@@ -56,6 +85,18 @@ api.interceptors.response.use(
         await AsyncStorage.removeItem('user');
         return Promise.reject(refreshError);
       }
+    }
+
+    if (
+      error.message === 'Network Error' &&
+      originalRequest &&
+      !originalRequest._baseUrlRetried &&
+      baseUrlIndex < BASE_URLS.length - 1
+    ) {
+      originalRequest._baseUrlRetried = true;
+      advanceBaseUrl();
+      originalRequest.baseURL = getCurrentBaseUrl();
+      return api(originalRequest);
     }
 
     return Promise.reject(error);

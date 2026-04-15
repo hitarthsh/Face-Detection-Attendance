@@ -4,7 +4,9 @@ const faceService = require('./face.service');
 
 const registerFace = async (req, res, next) => {
   try {
-    const { employeeId } = req.body;
+    const bodyEmployeeId = req.body?.employeeId;
+    const headerEmployeeId = req.headers['x-employee-id'];
+    const employeeId = String(bodyEmployeeId || headerEmployeeId || '').trim();
     if (!employeeId) {
       return res.status(400).json({ success: false, message: 'employeeId is required' });
     }

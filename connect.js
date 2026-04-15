@@ -64,9 +64,9 @@ console.log("\n--- Next Steps ---");
 console.log("1. Start Backend: cd backend && npm run dev");
 console.log("2. Start Frontend: cd frontend && npm start");
 console.log(`3. Create Admin: Run the following command after backend starts:`);
-console.log(`   curl -X POST ${apiUrl}/auth/register \\`);
-console.log(`     -H "Content-Type: application/json" \\`);
+console.log(`4. curl -X POST ${apiUrl}/auth/register \\`);
+console.log(`5.     -H "Content-Type: application/json" \\`);
 console.log(
-  `     -d "{\\\"name\\\":\\\"Admin\\\",\\\"email\\\":\\\"shahh0919@gmail.com\\\",\\\"password\\\":\\\"Hitarth@11\\\",\\\"role\\\":\\\"admin\\\"}"`,
+  `     -d "{\\\"name\\\":\\\"Admin\\\",\\\"email\\\":\\\"admin@company.com\\\",\\\"password\\\":\\\"hitarth@11\\\",\\\"role\\\":\\\"admin\\\"}"`,
 );
 console.log("\n------------------");

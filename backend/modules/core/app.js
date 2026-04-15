@@ -46,7 +46,9 @@ const createApp = () => {
   app.use(compression());
 
   // ─── Body Parsers ────────────────────────────────────────────────────────────
-  app.use(express.json({ limit: '10mb' }));
+  // Allow primitive JSON payloads (e.g. "null") so we can return validation errors
+  // instead of low-level JSON parse failures to the mobile client.
+  app.use(express.json({ limit: '10mb', strict: false }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
   // ─── MongoDB Injection Prevention ────────────────────────────────────────────

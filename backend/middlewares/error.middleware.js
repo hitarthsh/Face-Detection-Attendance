@@ -41,6 +41,12 @@ const errorMiddleware = (err, req, res, next) => {
     message = 'Token expired';
   }
 
+  // Body parser JSON errors (e.g. malformed/null payload parsing)
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    statusCode = 400;
+    message = 'Invalid JSON payload';
+  }
+
   logger.error(`${statusCode} - ${message}`, {
     url: req.originalUrl,
     method: req.method,

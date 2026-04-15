@@ -47,7 +47,8 @@ export const authService = {
 
   async logout(): Promise<void> {
     try {
-      await api.post('/auth/logout');
+      // Send an object body to avoid Express JSON strict-mode parse errors on `null`.
+      await api.post('/auth/logout', {});
     } finally {
       await this.clearSession();
     }
@@ -55,7 +56,17 @@ export const authService = {
 
   async getStoredUser(): Promise<User | null> {
     const userStr = await AsyncStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr || userStr === 'null' || userStr === 'undefined') {
+      return null;
+    }
+
+    try {
+      return JSON.parse(userStr) as User;
+    } catch {
+      // Recover from corrupted/stale storage values.
+      await AsyncStorage.removeItem('user');
+      return null;
+    }
   },
 
   async isAuthenticated(): Promise<boolean> {

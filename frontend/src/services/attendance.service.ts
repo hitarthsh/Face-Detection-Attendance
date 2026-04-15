@@ -45,7 +45,8 @@ export const attendanceService = {
     });
 
     const { data } = await api.post('/attendance/checkin', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      // Let RN/axios set multipart boundary automatically.
+      timeout: 120000,
     });
     return data.data;
   },
@@ -62,7 +63,7 @@ export const attendanceService = {
     });
 
     const { data } = await api.post('/attendance/checkout', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
     });
     return data.data;
   },
