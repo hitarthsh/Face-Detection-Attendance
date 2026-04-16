@@ -1,4 +1,5 @@
-import api from './api';
+import api, { postMultipartWithUrlFallback } from './api';
+import { mimeForPath, normalizeFileUri } from '../utils/faceUtils';
 
 export interface AttendanceRecord {
   _id: string;
@@ -18,12 +19,15 @@ export interface CheckInResult {
   success: boolean;
 }
 
-const buildFormData = (imageBuffer: string, fileName: string, extras?: Record<string, string>) => {
+const buildFormData = (imageUri: string, fileName: string, extras?: Record<string, string>) => {
+  const fileUri = normalizeFileUri(imageUri);
+  const mime = mimeForPath(fileUri);
+  const name = mime === 'image/png' ? fileName.replace(/\.jpe?g$/i, '.png') : fileName;
   const formData = new FormData();
   formData.append('image', {
-    uri: imageBuffer,
-    type: 'image/jpeg',
-    name: fileName,
+    uri: fileUri,
+    type: mime,
+    name,
   } as any);
 
   if (extras) {
@@ -37,17 +41,17 @@ export const attendanceService = {
     imageUri: string,
     location?: { latitude: number; longitude: number }
   ): Promise<AttendanceRecord> {
-    const formData = buildFormData(imageUri, 'checkin.jpg', {
+    const extras = {
       ...(location && {
         latitude: String(location.latitude),
         longitude: String(location.longitude),
       }),
-    });
-
-    const { data } = await api.post('/attendance/checkin', formData, {
-      // Let RN/axios set multipart boundary automatically.
-      timeout: 120000,
-    });
+    };
+    const { data } = await postMultipartWithUrlFallback<{ data: AttendanceRecord }>(
+      '/attendance/checkin',
+      () => buildFormData(imageUri, 'checkin.jpg', extras),
+      { timeout: 120000 }
+    );
     return data.data;
   },
 
@@ -55,16 +59,17 @@ export const attendanceService = {
     imageUri: string,
     location?: { latitude: number; longitude: number }
   ): Promise<AttendanceRecord> {
-    const formData = buildFormData(imageUri, 'checkout.jpg', {
+    const extras = {
       ...(location && {
         latitude: String(location.latitude),
         longitude: String(location.longitude),
       }),
-    });
-
-    const { data } = await api.post('/attendance/checkout', formData, {
-      timeout: 120000,
-    });
+    };
+    const { data } = await postMultipartWithUrlFallback<{ data: AttendanceRecord }>(
+      '/attendance/checkout',
+      () => buildFormData(imageUri, 'checkout.jpg', extras),
+      { timeout: 120000 }
+    );
     return data.data;
   },
 

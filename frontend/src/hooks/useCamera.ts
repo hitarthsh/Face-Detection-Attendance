@@ -87,7 +87,10 @@ export const useCamera = (): UseCameraReturn => {
       const photo = await cameraRef.current.takePhoto({
         flash: 'off',
       });
-      return `file://${photo.path}`;
+      const path = String(photo.path || '').trim();
+      if (!path) return null;
+      if (path.startsWith('file://') || path.startsWith('content://')) return path;
+      return `file://${path}`;
     } catch (error) {
       console.error('Camera capture error:', error);
       return null;

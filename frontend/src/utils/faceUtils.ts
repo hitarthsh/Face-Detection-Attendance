@@ -1,4 +1,23 @@
-import api from '../services/api';
+import { Platform } from 'react-native';
+import { postMultipartWithUrlFallback } from '../services/api';
+
+export function normalizeFileUri(uri: string): string {
+  let u = String(uri || '').trim();
+  if (u.startsWith('file://file://')) {
+    u = `file://${u.slice('file://file://'.length)}`;
+  }
+  if (Platform.OS === 'android' && u.startsWith('/') && !u.startsWith('file:')) {
+    u = `file://${u}`;
+  }
+  return u;
+}
+
+export function mimeForPath(uri: string): string {
+  const lower = uri.toLowerCase();
+  if (lower.endsWith('.png')) return 'image/png';
+  if (lower.endsWith('.webp')) return 'image/webp';
+  return 'image/jpeg';
+}
 
 /**
  * Upload a face image to generate registration embedding
@@ -7,23 +26,31 @@ export const registerFaceEmbedding = async (
   employeeId: string,
   imageUri: string
 ): Promise<{ captureCount: number }> => {
-  const normalizedEmployeeId = String(employeeId || '').trim();
-  const formData = new FormData();
-  formData.append('employeeId', normalizedEmployeeId);
-  formData.append('image', {
-    uri: imageUri,
-    type: 'image/jpeg',
-    name: 'face_register.jpg',
-  } as any);
+  const normalizedEmployeeId = String(employeeId || '').trim().toUpperCase();
+  const fileUri = normalizeFileUri(imageUri);
+  const mime = mimeForPath(fileUri);
 
-  const { data } = await api.post('/face/register', formData, {
-    // Let RN/axios set multipart boundary automatically.
-    timeout: 120000,
-    headers: {
-      // Backend fallback if multipart body fields are dropped by the client stack.
-      'x-employee-id': normalizedEmployeeId,
-    },
-  });
+  const buildFormData = () => {
+    const formData = new FormData();
+    formData.append('employeeId', normalizedEmployeeId);
+    formData.append('image', {
+      uri: fileUri,
+      type: mime,
+      name: mime === 'image/png' ? 'face_register.png' : 'face_register.jpg',
+    } as any);
+    return formData;
+  };
+
+  const { data } = await postMultipartWithUrlFallback<{ data: { captureCount: number } }>(
+    '/face/register',
+    buildFormData,
+    {
+      timeout: 120000,
+      headers: {
+        'x-employee-id': normalizedEmployeeId,
+      },
+    }
+  );
 
   return data.data;
 };
@@ -41,15 +68,29 @@ export const verifyFaceEmbedding = async (
   confidence?: number;
   confidencePercent?: string;
 }> => {
-  const formData = new FormData();
-  formData.append('image', {
-    uri: imageUri,
-    type: 'image/jpeg',
-    name: 'face_verify.jpg',
-  } as any);
+  const fileUri = normalizeFileUri(imageUri);
+  const mime = mimeForPath(fileUri);
 
-  const { data } = await api.post('/face/verify', formData, {
-    // Face verification can take longer on cold backend instances.
+  const buildFormData = () => {
+    const formData = new FormData();
+    formData.append('image', {
+      uri: fileUri,
+      type: mime,
+      name: mime === 'image/png' ? 'face_verify.png' : 'face_verify.jpg',
+    } as any);
+    return formData;
+  };
+
+  const { data } = await postMultipartWithUrlFallback<{
+    data: {
+      matched: boolean;
+      employeeId?: string;
+      employeeName?: string;
+      department?: string;
+      confidence?: number;
+      confidencePercent?: string;
+    };
+  }>('/face/verify', buildFormData, {
     timeout: 120000,
   });
 

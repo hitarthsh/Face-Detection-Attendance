@@ -109,8 +109,12 @@ const generateEmbedding = async (imageSource) => {
     const tensor = await loadImageAsTensor(imageSource);
 
     // Detect face + landmarks + descriptor
+    const detectorOptions = new faceapi.SsdMobilenetv1Options({
+      minConfidence: 0.35,
+      maxResults: 1,
+    });
     const result = await faceapi
-      .detectSingleFace(tensor)
+      .detectSingleFace(tensor, detectorOptions)
       .withFaceLandmarks()
       .withFaceDescriptor();
 

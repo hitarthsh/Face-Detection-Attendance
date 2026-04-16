@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { authService } from '../services/auth.service';
-import api from '../services/api';
+import api, { resetApiBaseUrlIndex } from '../services/api';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 
@@ -33,8 +33,14 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const checkServer = async () => {
     try {
       setServerStatus('checking');
-      await api.get('/health');
-      setServerStatus('online');
+      resetApiBaseUrlIndex();
+      // Backend returns 503 when MongoDB is down but the process is still reachable.
+      const res = await api.get('/health', {
+        validateStatus: () => true,
+        timeout: 12000,
+      });
+      const ok = res.status === 200 || res.status === 503;
+      setServerStatus(ok ? 'online' : 'offline');
     } catch {
       setServerStatus('offline');
     }

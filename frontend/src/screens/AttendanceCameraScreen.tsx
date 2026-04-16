@@ -14,6 +14,7 @@ import { useCamera } from '../hooks/useCamera';
 import FaceBox from '../components/FaceBox';
 import { attendanceService } from '../services/attendance.service';
 import { formatConfidence, getConfidenceColor } from '../utils/faceUtils';
+import { MULTIPART_RETRY_AFTER_AUTH } from '../services/api';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 
@@ -83,8 +84,16 @@ const AttendanceCameraScreen: React.FC<Props> = ({ route }) => {
         );
       }
     } catch (error: any) {
-      const msg =
-        error.response?.data?.message || error.message || 'Failed to process attendance';
+      if (error?.message === MULTIPART_RETRY_AFTER_AUTH) {
+        Alert.alert(
+          'Sign in refreshed',
+          'Please tap capture again after the session update.'
+        );
+        return;
+      }
+      const fromServer =
+        typeof error?.response?.data?.message === 'string' ? error.response.data.message : '';
+      const msg = fromServer || error.message || 'Failed to process attendance';
       Alert.alert('Error', msg);
     } finally {
       setLoading(false);

@@ -6,13 +6,14 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  SafeAreaView,
   Linking,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Camera } from 'react-native-vision-camera';
 import { useCamera } from '../hooks/useCamera';
 import FaceBox from '../components/FaceBox';
 import { registerFaceEmbedding } from '../utils/faceUtils';
+import { MULTIPART_RETRY_AFTER_AUTH } from '../services/api';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 
@@ -59,7 +60,18 @@ const FaceRegisterScreen: React.FC<Props> = ({ navigation, route }) => {
         );
       }
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Face registration failed');
+      if (error?.message === MULTIPART_RETRY_AFTER_AUTH) {
+        Alert.alert(
+          'Sign in refreshed',
+          'Please tap capture again — your photo needs to be sent once more after the session update.'
+        );
+        return;
+      }
+      const fromServer =
+        typeof error?.response?.data?.message === 'string' ? error.response.data.message : '';
+      const fromAxios = typeof error?.message === 'string' ? error.message : '';
+      const detail = fromServer || fromAxios || 'Face registration failed';
+      Alert.alert('Error', detail);
     } finally {
       setLoading(false);
     }

@@ -6,7 +6,10 @@ const registerFace = async (req, res, next) => {
   try {
     const bodyEmployeeId = req.body?.employeeId;
     const headerEmployeeId = req.headers['x-employee-id'];
-    const employeeId = String(bodyEmployeeId || headerEmployeeId || '').trim();
+    // Match Employee schema (employeeId stored uppercase)
+    const employeeId = String(bodyEmployeeId || headerEmployeeId || '')
+      .trim()
+      .toUpperCase();
     if (!employeeId) {
       return res.status(400).json({ success: false, message: 'employeeId is required' });
     }
