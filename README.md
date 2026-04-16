@@ -11,6 +11,7 @@ A **production-ready**, full-stack Attendance System using **face recognition** 
 - [Environment Configuration](#environment-configuration)
 - [API Reference](#api-reference)
 - [Face Recognition Flow](#face-recognition-flow)
+- [Backend - How It Works](#backend-how-it-works)
 - [Deployment](#deployment)
 
 ---
@@ -53,7 +54,7 @@ faceapp/
 | Backend | Node.js + Express.js |
 | Database | MongoDB + Mongoose |
 | Auth | JWT (access + refresh tokens) |
-| Face AI | TensorFlow.js + MediaPipe FaceMesh |
+| Face AI | TensorFlow.js (tfjs-backend-wasm) + @vladmandic/face-api (faceLandmark68Net/faceRecognitionNet) |
 | Security | Helmet, bcrypt, rate limiting |
 | Logging | Winston |
 
@@ -171,6 +172,18 @@ CLIENT_URL=http://localhost:3000,*
 
 ## 📡 API Reference
 
+Base URL (dev): `http://localhost:10000`
+
+All API endpoints are mounted under `/api`.
+
+### Common Request Rules
+- `Authorization: Bearer <accessToken>` for protected routes.
+- `Content-Type: application/json` for auth/JSON requests.
+- `Content-Type: multipart/form-data` for face registration/verification and attendance check-in/out.
+- Upload (Multer):
+  - Allowed image types: `image/jpeg`, `image/jpg`, `image/png`, `image/webp`
+  - Max file size: `MAX_FILE_SIZE` (default ~10MB in `backend/.env`)
+
 ### Authentication
 ```
 POST   /api/auth/login          Login → returns JWT tokens
@@ -180,35 +193,41 @@ POST   /api/auth/logout         Logout (requires auth)
 GET    /api/auth/profile        Get current user
 ```
 
-### Employees *(requires auth)*
+### Employees *(requires auth; admin for create/update/delete)*
 ```
-POST   /api/employees           Create employee (admin/manager)
-GET    /api/employees           List with pagination & search
-GET    /api/employees/:id       Get by ID or employeeId
-PUT    /api/employees/:id       Update (admin/manager)
-DELETE /api/employees/:id       Delete (admin only)
+POST   /api/employees           Create employee
+GET    /api/employees           List with pagination & filters
+GET    /api/employees/:id       Get by Mongo _id or employeeId
+PUT    /api/employees/:id       Update employee
+DELETE /api/employees/:id       Delete employee (admin only)
 ```
+Query params for `GET /api/employees`:
+- `page` (default `1`), `limit` (default `20`)
+- `search`, `department`, `isActive` (`true`/`false`)
 
 ### Face Recognition *(requires auth)*
 ```
-POST   /api/face/register       Register face → multipart/form-data (image + employeeId)
-POST   /api/face/verify         Verify face → multipart/form-data (image)
+POST   /api/face/register       Register face (multipart/form-data: image + employeeId)
+POST   /api/face/verify         Verify face (multipart/form-data: image)
 ```
+- `face/register`: allowed for `admin` or `manager` (also accepts `x-employee-id` header)
+- `face/verify`: returns matched employee + confidence when a match is found
 
 ### Attendance *(requires auth)*
 ```
-POST   /api/attendance/checkin  Check in via face → multipart/form-data (image)
-POST   /api/attendance/checkout Check out via face → multipart/form-data (image)
-GET    /api/attendance/today    Today's records (paginated)
-GET    /api/attendance/report   Historical report with filters
+POST   /api/attendance/checkin   Check in via face (multipart/form-data: image, optional latitude/longitude)
+POST   /api/attendance/checkout  Check out via face (multipart/form-data: image, optional latitude/longitude)
+GET    /api/attendance/today      Today's records (paginated; optional `department`)
+GET    /api/attendance/report     Historical report (date range + filters; paginated)
 ```
+- `GET /api/attendance/report` query params: `startDate`, `endDate`, `employeeId`, `department`, `page`, `limit`
 
 ### Admin *(requires admin role)*
 ```
-GET    /api/admin/dashboard     Stats (today, weekly, departments)
-GET    /api/admin/users         All system users
+GET    /api/admin/dashboard           Stats (today, weekly, departments)
+GET    /api/admin/users               All system users
 PUT    /api/admin/users/:id/role     Change user role
-PATCH  /api/admin/users/:id/toggle  Activate/deactivate user
+PATCH  /api/admin/users/:id/toggle   Activate/deactivate user
 ```
 
 ### Health
@@ -222,22 +241,46 @@ GET    /api/health              Server health, DB status, memory
 
 ```
 1. REGISTER (one-time per employee, 3 captures)
-   Employee photo → TensorFlow MediaPipe FaceMesh
-   → 478 landmark keypoints → normalized embedding vector
-   → Stored in MongoDB (Employee.faceEmbedding + FaceData.embeddings)
+   Employee photo -> face-api (faceLandmark68Net + faceRecognitionNet)
+   -> 128-D embedding descriptor
+   -> Stored in MongoDB (Employee.faceEmbedding + FaceData.embeddings)
 
 2. VERIFY (each check-in/out)
-   Live photo → Generate embedding
-   → Cosine similarity vs all registered embeddings
-   → If similarity >= threshold → Match found
-   → Mark attendance with confidence score
+   Live photo -> Generate embedding
+   -> Compare incoming embedding to stored embeddings using Euclidean distance
+   -> Convert distance to a 0..1 confidence score
+   -> If confidence >= FACE_MATCH_THRESHOLD -> Match found
+   -> Mark attendance with the confidence score
 
 3. MATCH THRESHOLD
-   Default: 0.6 cosine similarity
-   Confidence 90%+ = green
-   Confidence 75-90% = yellow
-   Below 75% = red / rejected
+   Default: `FACE_MATCH_THRESHOLD=0.6` (confidence scale 0..1; lower = stricter)
+   Confidence 0.9+ = green
+   Confidence 0.75-0.9 = yellow
+   Confidence < 0.75 = red / rejected
 ```
+
+---
+
+## 🧩 Backend - How It Works
+
+This is a Node.js + Express REST API that provides:
+- JWT authentication (access + refresh)
+- Employee management (CRUD)
+- Face registration + face verification (embedding generation + matching)
+- Attendance check-in / check-out (including optional `latitude` / `longitude`)
+- Admin dashboard + user management
+- Health monitoring (and health history snapshots)
+
+Key implementation notes:
+- API routes are mounted under `/api` via the app router (see `backend/modules/core/router.js`).
+- Upload handling uses Multer:
+  - `POST /api/face/register` stores images on disk (`uploads/faces`)
+  - `POST /api/face/verify` and attendance use in-memory buffers
+- The face model is initialized on startup (`initDetector()` in `backend/utils/faceMatcher.js`).
+
+For full details:
+- [`All api for Face Detection Attendance.md`](./All%20api%20for%20Face%20Detection%20Attendance.md)
+- [`Face Detection Attendance Back-end.md`](./Face%20Detection%20Attendance%20Back-end.md)
 
 ---
 
