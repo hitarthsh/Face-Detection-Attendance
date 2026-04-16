@@ -33,4 +33,4 @@ export type ApiConnectionTarget =
   | 'android-lan'
   | 'production';
 
-export const API_CONNECTION_TARGET: ApiConnectionTarget = 'auto';
+export const API_CONNECTION_TARGET: ApiConnectionTarget = 'android-usb';

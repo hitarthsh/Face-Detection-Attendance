@@ -23,7 +23,12 @@ const buildBaseUrlList = (): string[] => {
       case 'android-emulator':
         return [LOCAL_ANDROID_EMULATOR, PRODUCTION_API_BASE_URL];
       case 'android-usb':
-        return [LOCAL_LOOPBACK_IP, LOCAL_LOOPBACK, PRODUCTION_API_BASE_URL];
+        return [
+          LOCAL_LOOPBACK_IP,
+          LOCAL_LOOPBACK,
+          DEVELOPMENT_API_BASE_URL,
+          PRODUCTION_API_BASE_URL,
+        ];
       case 'android-lan':
         return [DEVELOPMENT_API_BASE_URL, PRODUCTION_API_BASE_URL];
       case 'production':
@@ -79,7 +84,12 @@ const buildAllHostsFailedMessage = (hostsTried: readonly string[]) =>
       LOCAL_DEV_API_PORT +
       ' is still blocked).',
     '3) Emulator uses 10.0.2.2 to reach your PC — same as Metro.',
-    '4) Physical phone: set DEVELOPMENT_API_BASE_URL in apiBaseUrl.ts to your PC IPv4.',
+    '4) USB phone: run `adb reverse tcp:' +
+      LOCAL_DEV_API_PORT +
+      ' tcp:' +
+      LOCAL_DEV_API_PORT +
+      '` and use API_CONNECTION_TARGET=android-usb.',
+    '5) Physical phone (Wi-Fi): set DEVELOPMENT_API_BASE_URL in apiBaseUrl.ts to your PC IPv4 and use API_CONNECTION_TARGET=android-lan.',
     '',
     'Hosts tried: ' + hostsTried.join(' → '),
   ].join('\n');
