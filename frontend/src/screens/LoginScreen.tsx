@@ -25,11 +25,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isResetMode, setIsResetMode] = useState(false);
-  const [resetToken, setResetToken] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [resetRequested, setResetRequested] = useState(false);
   const [serverStatus, setServerStatus] = useState<'checking' | 'online' | 'offline'>('checking');
 
   React.useEffect(() => {
@@ -74,61 +69,6 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleRequestReset = async () => {
-    if (!email.trim()) {
-      Alert.alert('Validation', 'Please enter your email first.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await authService.requestPasswordReset(email.trim());
-      setResetRequested(true);
-      const tokenHint = response.resetToken ? `\n\nReset Token: ${response.resetToken}` : '';
-      Alert.alert('Reset Requested', `${response.message}${tokenHint}`);
-    } catch (error: any) {
-      const apiMessage = error.response?.data?.message;
-      const message = typeof apiMessage === 'string' && apiMessage ? apiMessage : 'Failed to request reset token';
-      Alert.alert('Request Failed', message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResetPassword = async () => {
-    if (!email.trim() || !resetToken.trim() || !newPassword.trim() || !confirmPassword.trim()) {
-      Alert.alert('Validation', 'Please fill all reset fields');
-      return;
-    }
-    if (newPassword.length < 8) {
-      Alert.alert('Validation', 'New password must be at least 8 characters');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      Alert.alert('Validation', 'Passwords do not match');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await authService.resetPassword(resetToken.trim(), newPassword);
-      Alert.alert('Password Reset', response.message || 'Password reset successful');
-      setIsResetMode(false);
-      setResetRequested(false);
-      setResetToken('');
-      setNewPassword('');
-      setConfirmPassword('');
-      setPassword('');
-      navigation.replace('Login');
-    } catch (error: any) {
-      const apiMessage = error.response?.data?.message;
-      const message = typeof apiMessage === 'string' && apiMessage ? apiMessage : 'Failed to reset password';
-      Alert.alert('Reset Failed', message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     // <KeyboardAvoidingView
     //   style={{ flex: 1 }}
@@ -165,131 +105,37 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             autoComplete="email"
           />
 
-          {!isResetMode ? (
-            <>
-              <Text style={styles.label}>Password</Text>
-              <View style={styles.passwordContainer}>
-                <TextInput
-                  style={[styles.input, styles.passwordInput]}
-                  placeholder="Enter your password"
-                  placeholderTextColor="#555"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  autoComplete="password"
-                />
-                <TouchableOpacity
-                  style={styles.eyeBtn}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁'}</Text>
-                </TouchableOpacity>
-              </View>
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={[styles.input, styles.passwordInput]}
+              placeholder="Enter your password"
+              placeholderTextColor="#555"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoComplete="password"
+            />
+            <TouchableOpacity
+              style={styles.eyeBtn}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁'}</Text>
+            </TouchableOpacity>
+          </View>
 
-              <TouchableOpacity
-                style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
-                onPress={handleLogin}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.loginText}>Sign In</Text>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.secondaryBtn}
-                onPress={() => {
-                  setIsResetMode(true);
-                  setResetRequested(false);
-                  setResetToken('');
-                  setNewPassword('');
-                  setConfirmPassword('');
-                }}
-                disabled={loading}
-              >
-                <Text style={styles.secondaryBtnText}>Forgot Password?</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <TouchableOpacity
-                style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
-                onPress={handleRequestReset}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.loginText}>Get Reset Token</Text>
-                )}
-              </TouchableOpacity>
-
-              {resetRequested && (
-                <>
-                  <Text style={styles.label}>Reset Token</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Paste reset token"
-                    placeholderTextColor="#555"
-                    value={resetToken}
-                    onChangeText={setResetToken}
-                    autoCapitalize="none"
-                  />
-
-                  <Text style={styles.label}>New Password</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter new password"
-                    placeholderTextColor="#555"
-                    value={newPassword}
-                    onChangeText={setNewPassword}
-                    secureTextEntry
-                  />
-
-                  <Text style={styles.label}>Confirm Password</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Confirm new password"
-                    placeholderTextColor="#555"
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                    secureTextEntry
-                  />
-
-                  <TouchableOpacity
-                    style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
-                    onPress={handleResetPassword}
-                    disabled={loading}
-                    activeOpacity={0.8}
-                  >
-                    {loading ? (
-                      <ActivityIndicator color="#fff" />
-                    ) : (
-                      <Text style={styles.loginText}>Reset Password</Text>
-                    )}
-                  </TouchableOpacity>
-                </>
-              )}
-
-              <TouchableOpacity
-                style={styles.secondaryBtn}
-                onPress={() => {
-                  setIsResetMode(false);
-                  setResetRequested(false);
-                  setResetToken('');
-                  setNewPassword('');
-                  setConfirmPassword('');
-                }}
-                disabled={loading}
-              >
-                <Text style={styles.secondaryBtnText}>Back to Login</Text>
-              </TouchableOpacity>
-            </>
-          )}
+          <TouchableOpacity
+            style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.8}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginText}>Sign In</Text>
+            )}
+          </TouchableOpacity>
         </View>
 
         <Text style={styles.footer}>Face Detection Attendance System v1.0</Text>
@@ -347,16 +193,6 @@ const styles = StyleSheet.create({
   },
   loginBtnDisabled: { opacity: 0.6 },
   loginText: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
-  secondaryBtn: {
-    marginTop: 12,
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  secondaryBtnText: {
-    color: colors.primary,
-    fontSize: 13,
-    fontWeight: '700',
-  },
   footer: { textAlign: 'center', color: colors.textMuted, fontSize: 12, marginTop: 22 },
   statusBadge: {
     flexDirection: 'row',

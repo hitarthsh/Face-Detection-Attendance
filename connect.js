@@ -67,6 +67,6 @@ console.log(`3. Create Admin: Run the following command after backend starts:`);
 console.log(`4. curl -X POST ${apiUrl}/auth/register \\`);
 console.log(`5.     -H "Content-Type: application/json" \\`);
 console.log(
-  `     -d "{\\\"name\\\":\\\"Admin\\\",\\\"email\\\":\\\"admin@company.com\\\",\\\"password\\\":\\\"hitarth@11\\\",\\\"role\\\":\\\"admin\\\"}"`,
+  `     -d "{\\\"name\\\":\\\"Software Admin\\\",\\\"email\\\":\\\"software@cusmc.org\\\",\\\"password\\\":\\\"software@123\\\",\\\"role\\\":\\\"admin\\\"}"`,
 );
 console.log("\n------------------");

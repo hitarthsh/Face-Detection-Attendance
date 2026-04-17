@@ -6,12 +6,6 @@ export interface LoginCredentials {
   password: string;
 }
 
-export interface ForgotPasswordResponse {
-  message: string;
-  resetToken?: string;
-  expiresAt?: string;
-}
-
 export interface User {
   _id: string;
   name: string;
@@ -82,16 +76,6 @@ export const authService = {
 
   async getProfile(): Promise<User> {
     const { data } = await api.get('/auth/profile');
-    return data.data;
-  },
-
-  async requestPasswordReset(email: string): Promise<ForgotPasswordResponse> {
-    const { data } = await api.post('/auth/forgot-password', { email });
-    return data.data;
-  },
-
-  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
-    const { data } = await api.post('/auth/reset-password', { token, newPassword });
     return data.data;
   },
 };

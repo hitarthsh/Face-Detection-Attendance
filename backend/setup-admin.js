@@ -24,30 +24,23 @@ async function setupAdmin() {
 
     const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
-    const adminEmail = "admin@company.com";
-    const adminPassword = "hitarth@11";
-    const existingAdmin = await User.findOne({ email: adminEmail });
+    const adminEmail = "software@cusmc.org";
+    const adminPassword = "software@123";
+    const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
-    if (existingAdmin) {
-      console.log(`ℹ️ Admin user already exists: ${adminEmail}`);
-      const hashedPassword = await bcrypt.hash(adminPassword, 12);
-      await User.updateOne({ email: adminEmail }, { password: hashedPassword });
-      console.log("✅ Admin password updated successfully!");
-    } else {
-      const hashedPassword = await bcrypt.hash(adminPassword, 12);
+    // Keep only the requested admin credentials in the users collection.
+    await User.deleteMany({});
+    await User.create({
+      name: "Software Admin",
+      email: adminEmail,
+      password: hashedPassword,
+      role: "admin",
+      isActive: true,
+    });
 
-      await User.create({
-        name: "Super Admin",
-        email: adminEmail,
-        password: hashedPassword,
-        role: "admin",
-        isActive: true,
-      });
-
-      console.log("✅ Admin user created successfully!");
-      console.log(`📧 Email: ${adminEmail}`);
-      console.log(`🔑 Password: ${adminPassword}`);
-    }
+    console.log("✅ Existing users removed and new admin created successfully!");
+    console.log(`📧 Email: ${adminEmail}`);
+    console.log(`🔑 Password: ${adminPassword}`);
   } catch (error) {
     console.error("❌ Error setting up admin:", error.message);
   } finally {
