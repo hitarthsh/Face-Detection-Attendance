@@ -5,20 +5,24 @@ const { connectDB } = require('./config/db');
 const env = require('./config/env');
 const logger = require('./utils/logger');
 const { initDetector } = require('./utils/faceMatcher');
+const { seedDefaultAdmin } = require('./modules/auth/seedAdmin');
 
 const startServer = async () => {
   try {
     // 1. Connect to MongoDB
     await connectDB();
 
-    // 2. Pre-warm face detection model
+    // 2. Ensure default admin user exists (useful for fresh deployments)
+    await seedDefaultAdmin();
+
+    // 3. Pre-warm face detection model
     logger.info('Initializing face detection model...');
     await initDetector();
 
-    // 3. Create Express app
+    // 4. Create Express app
     const app = createApp();
 
-    // 4. Start listening
+    // 5. Start listening
     const server = app.listen(env.PORT, env.HOST, () => {
       logger.info(`🚀 Server running on port ${env.PORT} [${env.NODE_ENV}]`);
       logger.info(`📡 API Base (localhost): http://localhost:${env.PORT}/api`);
