@@ -70,10 +70,10 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    // <KeyboardAvoidingView
-    //   style={{ flex: 1 }}
-    //   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    // >
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <View style={styles.content}>
         {/* Logo */}
         <View style={styles.logoContainer}>
@@ -140,7 +140,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
         <Text style={styles.footer}>Face Detection Attendance System v1.0</Text>
       </View>
-    // </KeyboardAvoidingView>
+    </KeyboardAvoidingView>
   );
 };
 
