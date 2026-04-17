@@ -22,7 +22,8 @@ export const DEVELOPMENT_API_BASE_URL = `http://125.125.1.144:${LOCAL_DEV_API_PO
  * How the app should connect to backend in development.
  * - auto: tries emulator, USB reverse, LAN, then production
  * - android-emulator: force 10.0.2.2
- * - android-usb: force localhost (requires adb reverse)
+ * - android-usb: dev Android — tries emulator host (10.0.2.2), then LAN URL, then loopback
+ *   (loopback only reaches your PC with `adb reverse tcp:<PORT> tcp:<PORT>` on a physical device)
  * - android-lan: force DEVELOPMENT_API_BASE_URL
  * - production: force cloud URL
  */
@@ -33,4 +34,7 @@ export type ApiConnectionTarget =
   | 'android-lan'
   | 'production';
 
-export const API_CONNECTION_TARGET: ApiConnectionTarget = 'android-usb';
+// Use local targets only during development. Release APK should default to cloud API.
+export const API_CONNECTION_TARGET: ApiConnectionTarget = __DEV__
+  ? 'android-usb'
+  : 'production';

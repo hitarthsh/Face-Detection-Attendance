@@ -71,9 +71,9 @@ const verifyFace = async (imageBuffer) => {
   }
 
   // Fetch all registered employees with embeddings
-  const employees = await Employee.find({ faceRegistered: true, isActive: true }).select(
-    '+faceEmbedding employeeId name department'
-  );
+  const employees = await Employee.find({ faceRegistered: true, isActive: true })
+    .select('+faceEmbedding employeeId name department')
+    .lean();
 
   if (employees.length === 0) {
     return { matched: false, message: 'No registered faces in database' };

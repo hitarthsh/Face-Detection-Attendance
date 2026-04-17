@@ -77,6 +77,13 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
+    externalNativeBuild {
+        cmake {
+            // Keep native intermediates on a short path to avoid Windows MAX_PATH errors.
+            buildStagingDirectory "C:/cxx/${rootProject.name}/${project.name}"
+        }
+    }
+
     namespace "com.faceattendanceshell"
     defaultConfig {
         applicationId "com.faceattendanceshell"

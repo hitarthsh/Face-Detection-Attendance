@@ -23,10 +23,13 @@ const buildBaseUrlList = (): string[] => {
       case 'android-emulator':
         return [LOCAL_ANDROID_EMULATOR, PRODUCTION_API_BASE_URL];
       case 'android-usb':
+        // Emulator: 127.0.0.1 is the emulator itself — use 10.0.2.2 first.
+        // Physical USB: use adb reverse, then loopback works; or set DEVELOPMENT_API_BASE_URL (Wi‑Fi).
         return [
+          LOCAL_ANDROID_EMULATOR,
+          DEVELOPMENT_API_BASE_URL,
           LOCAL_LOOPBACK_IP,
           LOCAL_LOOPBACK,
-          DEVELOPMENT_API_BASE_URL,
           PRODUCTION_API_BASE_URL,
         ];
       case 'android-lan':

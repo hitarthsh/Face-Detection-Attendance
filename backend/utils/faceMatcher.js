@@ -51,7 +51,9 @@ const initDetector = async () => {
 
   await faceapi.nets.faceLandmark68Net.loadFromDisk(modelsPath);
   await faceapi.nets.faceRecognitionNet.loadFromDisk(modelsPath);
-  await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelsPath);
+  // TinyFaceDetector uses much less memory than SSD Mobilenet and is better for
+  // low-memory hosted instances (e.g. 512MB Render free tier).
+  await faceapi.nets.tinyFaceDetector.loadFromDisk(modelsPath);
 
   isModelLoaded = true;
   logger.info('Face detection models loaded successfully');
@@ -103,23 +105,29 @@ const loadImageAsTensor = async (imageSource) => {
  * @returns {Float32Array|null} - 128-dim embedding or null if no face found
  */
 const generateEmbedding = async (imageSource) => {
+  let tensor;
   try {
     await initDetector();
 
-    const tensor = await loadImageAsTensor(imageSource);
+    tensor = await loadImageAsTensor(imageSource);
 
     // Detect face + landmarks + descriptor
-    const detectorOptions = new faceapi.SsdMobilenetv1Options({
-      minConfidence: 0.35,
-      maxResults: 1,
+    const detectorOptions = new faceapi.TinyFaceDetectorOptions({
+      scoreThreshold: 0.35,
+      inputSize: 320,
     });
-    const result = await faceapi
-      .detectSingleFace(tensor, detectorOptions)
-      .withFaceLandmarks()
-      .withFaceDescriptor();
 
-    // Free tensor memory
-    tensor.dispose();
+    // Ensure transient tensors created by face-api are released each request.
+    tf.engine().startScope();
+    let result;
+    try {
+      result = await faceapi
+        .detectSingleFace(tensor, detectorOptions)
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+    } finally {
+      tf.engine().endScope();
+    }
 
     if (!result) {
       logger.warn('No face detected in the image');
@@ -131,6 +139,10 @@ const generateEmbedding = async (imageSource) => {
   } catch (error) {
     logger.error(`generateEmbedding error: ${error.message}`);
     throw error;
+  } finally {
+    if (tensor) {
+      tensor.dispose();
+    }
   }
 };
 

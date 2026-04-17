@@ -49,7 +49,8 @@ const uploadMemory = multer({
   storage: memoryStorage,
   fileFilter: imageFileFilter,
   limits: {
-    fileSize: env.MAX_FILE_SIZE,
+    // Verification runs in-memory; keep payloads small to prevent OOM spikes.
+    fileSize: Math.min(env.MAX_FILE_SIZE, 3 * 1024 * 1024),
     files: 1,
   },
 });
