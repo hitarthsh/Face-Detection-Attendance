@@ -14,6 +14,7 @@ import { authService } from '../services/auth.service';
 import api, { resetApiBaseUrlIndex } from '../services/api';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
+import { colors, radii, shadow, spacing } from '../theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
@@ -69,18 +70,18 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    // <KeyboardAvoidingView
+    //   style={{ flex: 1 }}
+    //   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    // >
       <View style={styles.content}>
         {/* Logo */}
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
             <Text style={styles.logoIcon}>👁</Text>
           </View>
-          <Text style={styles.appName}>FaceAttend By IT</Text>
-          <Text style={styles.tagline}>Secure Face Recognition Attendance</Text>
+          <Text style={styles.appName}>FaceAttend</Text>
+          <Text style={styles.tagline}>Secure face recognition attendance</Text>
 
           <TouchableOpacity style={styles.statusBadge} onPress={checkServer}>
             <View style={[styles.statusDot, { backgroundColor: serverStatus === 'online' ? '#4ADE80' : serverStatus === 'offline' ? '#F87171' : '#9CA3AF' }]} />
@@ -95,7 +96,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.label}>Email Address</Text>
           <TextInput
             style={styles.input}
-            placeholder="email id"
+            placeholder="name@company.com"
             placeholderTextColor="#555"
             value={email}
             onChangeText={setEmail}
@@ -108,7 +109,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
           <View style={styles.passwordContainer}>
             <TextInput
               style={[styles.input, styles.passwordInput]}
-              placeholder="password"
+              placeholder="Enter your password"
               placeholderTextColor="#555"
               value={password}
               onChangeText={setPassword}
@@ -139,41 +140,43 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
         <Text style={styles.footer}>Face Detection Attendance System v1.0</Text>
       </View>
-    </KeyboardAvoidingView>
+    // </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#2626dd' },
-  content: { flex: 1, justifyContent: 'center', paddingHorizontal: 28 },
-  logoContainer: { alignItems: 'center', marginBottom: 40 },
+  content: { flex: 1, justifyContent: 'center', paddingHorizontal: 24, backgroundColor: colors.bg },
+  logoContainer: { alignItems: 'center', marginBottom: 34 },
   logoCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: '#70ff63',
+    width: 82,
+    height: 82,
+    borderRadius: 41,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
-    shadowColor: '#09cc23',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
-    elevation: 12,
+    marginBottom: 14,
+    ...shadow,
   },
-  logoIcon: { fontSize: 40 },
-  appName: { fontSize: 32, fontWeight: '800', color: '#f78215', letterSpacing: 1 },
-  tagline: { fontSize: 14, color: '#0be90b', marginTop: 6 },
-  form: { gap: 8 },
-  label: { color: '#9090A0', fontSize: 13, fontWeight: '600', marginBottom: 4, marginTop: 12 },
-  input: {
-    backgroundColor: '#1C1C2E',
+  logoIcon: { fontSize: 34 },
+  appName: { fontSize: 30, fontWeight: '800', color: colors.text, letterSpacing: 0.5 },
+  tagline: { fontSize: 13, color: colors.textMuted, marginTop: 6 },
+  form: {
+    gap: 8,
+    backgroundColor: colors.surface,
+    borderRadius: radii.lg,
+    padding: spacing.lg,
     borderWidth: 1,
-    borderColor: '#2D2D3F',
-    borderRadius: 12,
+    borderColor: colors.border,
+  },
+  label: { color: colors.textMuted, fontSize: 13, fontWeight: '600', marginBottom: 4, marginTop: 10 },
+  input: {
+    backgroundColor: colors.surfaceSoft,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radii.md,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    color: '#deec16',
+    color: colors.text,
     fontSize: 15,
   },
   passwordContainer: { position: 'relative' },
@@ -181,30 +184,26 @@ const styles = StyleSheet.create({
   eyeBtn: { position: 'absolute', right: 16, top: 14 },
   eyeIcon: { fontSize: 18 },
   loginBtn: {
-    backgroundColor: '#6C63FF',
-    borderRadius: 14,
+    backgroundColor: colors.primary,
+    borderRadius: radii.md,
     paddingVertical: 16,
     alignItems: 'center',
-    marginTop: 24,
-    shadowColor: '#6C63FF',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    marginTop: 20,
+    ...shadow,
   },
   loginBtnDisabled: { opacity: 0.6 },
-  loginText: { color: '#fff', fontSize: 17, fontWeight: '700', letterSpacing: 0.5 },
-  footer: { textAlign: 'center', color: '#444', fontSize: 12, marginTop: 40 },
+  loginText: { color: '#fff', fontSize: 16, fontWeight: '700', letterSpacing: 0.3 },
+  footer: { textAlign: 'center', color: colors.textMuted, fontSize: 12, marginTop: 22 },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1C1C2E',
+    backgroundColor: colors.surface,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 20,
-    marginTop: 16,
+    borderRadius: radii.pill,
+    marginTop: 14,
     borderWidth: 1,
-    borderColor: '#2D2D3F',
+    borderColor: colors.border,
   },
   statusDot: {
     width: 8,
@@ -213,7 +212,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   statusText: {
-    color: '#9090A0',
+    color: colors.textMuted,
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.5,

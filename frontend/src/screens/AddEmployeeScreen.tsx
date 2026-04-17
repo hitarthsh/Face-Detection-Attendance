@@ -14,6 +14,7 @@ import {
 import api from '../services/api';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
+import { colors, radii, shadow } from '../theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'AddEmployee'>;
@@ -120,29 +121,30 @@ const AddEmployeeScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0D0D1A' },
+  container: { flex: 1, backgroundColor: colors.bg },
   scroll: { flex: 1, padding: 20 },
-  title: { fontSize: 24, fontWeight: '800', color: '#F0F0F5', marginBottom: 24 },
+  title: { fontSize: 24, fontWeight: '800', color: colors.text, marginBottom: 24 },
   fieldContainer: { marginBottom: 16 },
-  label: { color: '#9090A0', fontSize: 13, fontWeight: '600', marginBottom: 6 },
-  required: { color: '#EF4444' },
+  label: { color: colors.textMuted, fontSize: 13, fontWeight: '600', marginBottom: 6 },
+  required: { color: colors.danger },
   input: {
-    backgroundColor: '#1C1C2E',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#2D2D3F',
-    borderRadius: 12,
+    borderColor: colors.border,
+    borderRadius: radii.md,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    color: '#F0F0F5',
+    color: colors.text,
     fontSize: 15,
   },
   submitBtn: {
-    backgroundColor: '#6C63FF',
-    borderRadius: 14,
+    backgroundColor: colors.primary,
+    borderRadius: radii.md,
     paddingVertical: 16,
     alignItems: 'center',
     marginTop: 24,
     marginBottom: 40,
+    ...shadow,
   },
   submitBtnDisabled: { opacity: 0.6 },
   submitText: { color: '#fff', fontSize: 17, fontWeight: '700' },

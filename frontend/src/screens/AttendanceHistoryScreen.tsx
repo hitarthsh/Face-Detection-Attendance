@@ -9,12 +9,13 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { attendanceService, AttendanceRecord } from '../services/attendance.service';
+import { colors, radii } from '../theme';
 
 const STATUS_COLORS: Record<string, string> = {
-  present: '#10B981',
-  late: '#F59E0B',
-  absent: '#EF4444',
-  half_day: '#06B6D4',
+  present: colors.success,
+  late: colors.warning,
+  absent: colors.danger,
+  half_day: colors.info,
   on_leave: '#8B5CF6',
 };
 
@@ -70,7 +71,7 @@ const AttendanceCard = ({ record }: { record: AttendanceRecord }) => {
         </View>
         <View style={styles.timeBox}>
           <Text style={styles.timeLabel}>CONFIDENCE</Text>
-          <Text style={[styles.timeValue, { color: '#6C63FF' }]}>
+          <Text style={[styles.timeValue, { color: colors.primary }]}>
             {(record.confidenceScore * 100).toFixed(0)}%
           </Text>
         </View>
@@ -131,7 +132,7 @@ const AttendanceHistoryScreen: React.FC = () => {
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#6C63FF" style={styles.loader} />
+        <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
       ) : (
         <FlatList
           data={records}
@@ -141,7 +142,7 @@ const AttendanceHistoryScreen: React.FC = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => { setRefreshing(true); fetchRecords(); }}
-              tintColor="#6C63FF"
+              tintColor={colors.primary}
             />
           }
           ListEmptyComponent={
@@ -155,45 +156,45 @@ const AttendanceHistoryScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0D0D1A' },
+  container: { flex: 1, backgroundColor: colors.bg },
   header: { paddingHorizontal: 20, paddingTop: 50, paddingBottom: 8 },
-  title: { fontSize: 26, fontWeight: '800', color: '#F0F0F5' },
+  title: { fontSize: 26, fontWeight: '800', color: colors.text },
   tabs: {
     flexDirection: 'row',
     marginHorizontal: 16,
     marginBottom: 12,
-    backgroundColor: '#1C1C2E',
-    borderRadius: 12,
+    backgroundColor: colors.surface,
+    borderRadius: radii.md,
     padding: 4,
   },
   tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 10 },
-  tabActive: { backgroundColor: '#6C63FF' },
-  tabText: { color: '#9090A0', fontWeight: '600', fontSize: 14 },
+  tabActive: { backgroundColor: colors.primary },
+  tabText: { color: colors.textMuted, fontWeight: '600', fontSize: 14 },
   tabTextActive: { color: '#fff' },
   loader: { marginTop: 60 },
-  emptyText: { textAlign: 'center', color: '#555', marginTop: 60, fontSize: 16 },
+  emptyText: { textAlign: 'center', color: colors.textMuted, marginTop: 60, fontSize: 16 },
   card: {
-    backgroundColor: '#1C1C2E',
-    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radii.md,
     marginHorizontal: 16,
     marginVertical: 6,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#2D2D3F',
+    borderColor: colors.border,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   nameContainer: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#6C63FF', justifyContent: 'center', alignItems: 'center' },
+  avatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, justifyContent: 'center', alignItems: 'center' },
   avatarText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  name: { color: '#F0F0F5', fontSize: 15, fontWeight: '700' },
-  dept: { color: '#9090A0', fontSize: 12 },
+  name: { color: colors.text, fontSize: 15, fontWeight: '700' },
+  dept: { color: colors.textMuted, fontSize: 12 },
   badge: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4 },
   badgeText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.5 },
   timeRow: { flexDirection: 'row', justifyContent: 'space-between' },
   timeBox: { flex: 1, alignItems: 'center' },
-  timeLabel: { color: '#9090A0', fontSize: 9, fontWeight: '700', marginBottom: 4, letterSpacing: 0.5 },
-  timeValue: { color: '#F0F0F5', fontSize: 13, fontWeight: '600' },
-  timeDivider: { width: 1, backgroundColor: '#2D2D3F', marginVertical: 4 },
+  timeLabel: { color: colors.textMuted, fontSize: 9, fontWeight: '700', marginBottom: 4, letterSpacing: 0.5 },
+  timeValue: { color: colors.text, fontSize: 13, fontWeight: '600' },
+  timeDivider: { width: 1, backgroundColor: colors.border, marginVertical: 4 },
 });
 
 export default AttendanceHistoryScreen;

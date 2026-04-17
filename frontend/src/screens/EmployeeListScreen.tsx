@@ -13,6 +13,7 @@ import api from '../services/api';
 import EmployeeCard, { Employee } from '../components/EmployeeCard';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
+import { colors, radii } from '../theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Main'>;
@@ -87,7 +88,7 @@ const EmployeeListScreen: React.FC<Props> = ({ navigation }) => {
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#6b63ffd4" style={styles.loader} />
+        <ActivityIndicator size="large" color={colors.primary} style={styles.loader} />
       ) : (
         <FlatList
           data={employees}
@@ -105,7 +106,7 @@ const EmployeeListScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0D0D1A' },
+  container: { flex: 1, backgroundColor: colors.bg },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -114,10 +115,10 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingBottom: 16,
   },
-  title: { fontSize: 26, fontWeight: '800', color: '#F0F0F5' },
+  title: { fontSize: 26, fontWeight: '800', color: colors.text },
   addBtn: {
-    backgroundColor: '#6C63FF',
-    borderRadius: 12,
+    backgroundColor: colors.primary,
+    borderRadius: radii.md,
     paddingHorizontal: 16,
     paddingVertical: 8,
   },
@@ -125,18 +126,18 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1C1C2E',
+    backgroundColor: colors.surface,
     marginHorizontal: 16,
-    borderRadius: 14,
+    borderRadius: radii.md,
     paddingHorizontal: 14,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#2D2D3F',
+    borderColor: colors.border,
   },
   searchIcon: { fontSize: 16, marginRight: 8 },
-  searchInput: { flex: 1, color: '#F0F0F5', fontSize: 15, paddingVertical: 12 },
+  searchInput: { flex: 1, color: colors.text, fontSize: 15, paddingVertical: 12 },
   loader: { marginTop: 60 },
-  emptyText: { textAlign: 'center', color: '#555', marginTop: 60, fontSize: 16 },
+  emptyText: { textAlign: 'center', color: colors.textMuted, marginTop: 60, fontSize: 16 },
 });
 
 export default EmployeeListScreen;

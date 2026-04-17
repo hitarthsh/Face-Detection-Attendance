@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -44,8 +44,28 @@ const AttendanceCameraScreen: React.FC<Props> = ({ route }) => {
   const [loading, setLoading] = useState(false);
   const [lastResult, setLastResult] = useState<VerifyResult | null>(null);
 
+  const modeColor = mode === 'checkin' ? '#10B981' : '#EF4444';
+  const modeLabel = mode === 'checkin' ? 'CHECK IN' : 'CHECK OUT';
+  const modeIcon = mode === 'checkin' ? '📷' : '🚪';
+  const isBusy = loading || isCapturing;
+
+  const statusCopy = useMemo(() => {
+    if (isBusy) {
+      return mode === 'checkin'
+        ? { title: 'Verifying check-in...', subtitle: 'Hold still while we process your face.' }
+        : { title: 'Verifying check-out...', subtitle: 'Hold still while we process your face.' };
+    }
+    if (lastResult?.matched) {
+      return { title: 'Face matched', subtitle: 'Identity verified successfully.' };
+    }
+    return {
+      title: 'Ready to scan',
+      subtitle: 'Align your face inside the frame for best results.',
+    };
+  }, [isBusy, lastResult?.matched, mode]);
+
   const handleCapture = useCallback(async () => {
-    if (loading || isCapturing) return;
+    if (isBusy) return;
     setLoading(true);
     setLastResult(null);
     try {
@@ -98,7 +118,7 @@ const AttendanceCameraScreen: React.FC<Props> = ({ route }) => {
     } finally {
       setLoading(false);
     }
-  }, [loading, isCapturing, captureImage, mode]);
+  }, [isBusy, captureImage, mode]);
 
   const handleRequestPermission = useCallback(async () => {
     const granted = await requestPermission();
@@ -145,10 +165,6 @@ const AttendanceCameraScreen: React.FC<Props> = ({ route }) => {
     );
   }
 
-  const modeColor = mode === 'checkin' ? '#10B981' : '#EF4444';
-  const modeLabel = mode === 'checkin' ? 'CHECK IN' : 'CHECK OUT';
-  const modeIcon = mode === 'checkin' ? '📷' : '🚪';
-
   return (
     <SafeAreaView style={styles.container}>
       <Camera
@@ -167,71 +183,87 @@ const AttendanceCameraScreen: React.FC<Props> = ({ route }) => {
 
 
       <View style={styles.overlay}>
-        {/* Mode Badge */}
-        <View
-          style={[
-            styles.modeBadge,
-            { backgroundColor: `${modeColor}30`, borderColor: modeColor },
-          ]}
-        >
-          <Text style={styles.modeIcon}>{modeIcon}</Text>
-          <Text style={[styles.modeLabel, { color: modeColor }]}>{modeLabel}</Text>
+        <View style={styles.headerArea}>
+          <View
+            style={[
+              styles.modeBadge,
+              { backgroundColor: `${modeColor}30`, borderColor: modeColor },
+            ]}
+          >
+            <Text style={styles.modeIcon}>{modeIcon}</Text>
+            <Text style={[styles.modeLabel, { color: modeColor }]}>{modeLabel}</Text>
+          </View>
+
+          <View style={styles.statusCard}>
+            <View
+              style={[
+                styles.statusDot,
+                { backgroundColor: isBusy ? '#F59E0B' : lastResult?.matched ? '#10B981' : '#6C63FF' },
+              ]}
+            />
+            <View style={styles.statusBody}>
+              <Text style={styles.statusTitle}>{statusCopy.title}</Text>
+              <Text style={styles.statusSubtitle}>{statusCopy.subtitle}</Text>
+            </View>
+          </View>
         </View>
 
-        {/* Face Box — shows green when matched, purple when searching */}
         <FaceBox
           isDetected={lastResult?.matched ?? false}
           confidence={lastResult?.confidence}
         />
 
-        {/* Result display */}
-        {lastResult?.matched && lastResult.confidence != null && (
-          <View style={styles.resultCard}>
-            <Text style={styles.resultName}>{lastResult.employeeName}</Text>
-            <Text style={styles.resultDept}>{lastResult.department}</Text>
-            <Text
-              style={[
-                styles.resultConf,
-                { color: getConfidenceColor(lastResult.confidence) },
-              ]}
-            >
-              Confidence: {formatConfidence(lastResult.confidence)}
+        <View style={styles.bottomPanel}>
+          {lastResult?.matched && lastResult.confidence != null ? (
+            <View style={styles.resultCard}>
+              <Text style={styles.resultName}>{lastResult.employeeName}</Text>
+              <Text style={styles.resultDept}>{lastResult.department}</Text>
+              <Text
+                style={[
+                  styles.resultConf,
+                  { color: getConfidenceColor(lastResult.confidence) },
+                ]}
+              >
+                Confidence: {formatConfidence(lastResult.confidence)}
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.instructions}>
+              Place your face in the frame{'\n'}Look straight and keep steady for 1-2 seconds
             </Text>
+          )}
+
+          <View style={styles.controls}>
+            <TouchableOpacity style={styles.flipBtn} onPress={toggleFacing} activeOpacity={0.85}>
+              <Text style={styles.flipIcon}>🔄</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.captureBtn,
+                { borderColor: modeColor },
+                isBusy && styles.captureBtnDisabled,
+              ]}
+              onPress={handleCapture}
+              disabled={isBusy}
+              activeOpacity={0.9}
+            >
+              {loading ? (
+                <ActivityIndicator color={modeColor} />
+              ) : (
+                <View style={[styles.captureBtnInner, { backgroundColor: modeColor }]} />
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.secondaryBtn, !lastResult && styles.secondaryBtnDisabled]}
+              onPress={() => setLastResult(null)}
+              disabled={!lastResult}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.secondaryBtnText}>Reset</Text>
+            </TouchableOpacity>
           </View>
-        )}
-
-        {/* Instructions */}
-        {!lastResult && (
-          <Text style={styles.instructions}>
-            Position your face within the frame{'\n'}Ensure good lighting
-          </Text>
-        )}
-
-        {/* Controls */}
-        <View style={styles.controls}>
-          <TouchableOpacity style={styles.flipBtn} onPress={toggleFacing}>
-            <Text style={styles.flipIcon}>🔄</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.captureBtn,
-              { borderColor: modeColor },
-              (loading || isCapturing) && styles.captureBtnDisabled,
-            ]}
-            onPress={handleCapture}
-            disabled={loading || isCapturing}
-            activeOpacity={0.8}
-          >
-            {loading ? (
-              <ActivityIndicator color={modeColor} />
-            ) : (
-              <View style={[styles.captureBtnInner, { backgroundColor: modeColor }]} />
-            )}
-          </TouchableOpacity>
-
-          {/* Spacer to keep capture button centered */}
-          <View style={styles.spacer} />
         </View>
       </View>
     </SafeAreaView>
@@ -242,13 +274,19 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: 'rgba(0,0,0,0.45)',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 50,
+    paddingVertical: 24,
     paddingHorizontal: 20,
   },
+  headerArea: {
+    width: '100%',
+    gap: 12,
+    marginTop: 8,
+  },
   modeBadge: {
+    alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 20,
@@ -258,51 +296,113 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   modeIcon: { fontSize: 20 },
-  modeLabel: { fontSize: 16, fontWeight: '800', letterSpacing: 2 },
-  resultCard: {
-    backgroundColor: 'rgba(0,0,0,0.75)',
+  modeLabel: { fontSize: 14, fontWeight: '800', letterSpacing: 1.8 },
+  statusCard: {
+    width: '100%',
+    backgroundColor: 'rgba(17,24,39,0.82)',
     borderRadius: 16,
-    padding: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    flexDirection: 'row',
     alignItems: 'center',
-    width: '90%',
+  },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  statusBody: { flex: 1 },
+  statusTitle: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  statusSubtitle: {
+    color: 'rgba(255,255,255,0.78)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  bottomPanel: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 8,
+  },
+  resultCard: {
+    backgroundColor: 'rgba(17,24,39,0.86)',
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    width: '100%',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   resultName: { color: '#fff', fontSize: 20, fontWeight: '700' },
   resultDept: { color: '#9090A0', fontSize: 14, marginTop: 4 },
   resultConf: { fontSize: 16, fontWeight: '600', marginTop: 8 },
   instructions: {
     color: 'rgba(255,255,255,0.8)',
-    fontSize: 15,
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 21,
+    backgroundColor: 'rgba(17,24,39,0.72)',
+    width: '100%',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
   },
   controls: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 30,
+    gap: 18,
   },
   flipBtn: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255,255,255,0.18)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   flipIcon: { fontSize: 22 },
   captureBtn: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     borderWidth: 3,
     borderColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.22)',
   },
   captureBtnDisabled: { opacity: 0.5 },
-  captureBtnInner: { width: 60, height: 60, borderRadius: 30 },
-  spacer: { width: 50 },
+  captureBtnInner: { width: 66, height: 66, borderRadius: 33 },
+  secondaryBtn: {
+    minWidth: 70,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  secondaryBtnDisabled: { opacity: 0.4 },
+  secondaryBtnText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '700',
+  },
   permissionContainer: {
     flex: 1,
     justifyContent: 'center',

@@ -12,6 +12,7 @@ import api from '../services/api';
 import { authService } from '../services/auth.service';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
+import { colors, radii, shadow } from '../theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Main'>;
@@ -66,7 +67,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   if (loading) {
     return (
       <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#6C63FF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -76,7 +77,7 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <ScrollView
       style={styles.container}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchDashboard(); }} tintColor="#6C63FF" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchDashboard(); }} tintColor={colors.primary} />}
     >
       {/* Header */}
       <View style={styles.header}>
@@ -115,21 +116,21 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
       <Text style={styles.sectionTitle}>Quick Actions</Text>
       <View style={styles.actionsRow}>
         <TouchableOpacity
-          style={[styles.actionBtn, { backgroundColor: '#10B98120', borderColor: '#10B981' }]}
+          style={[styles.actionBtn, { backgroundColor: '#10B98120', borderColor: colors.success }]}
           onPress={() => navigation.navigate('AttendanceCamera', { mode: 'checkin' })}
         >
           <Text style={styles.actionIcon}>📷</Text>
           <Text style={[styles.actionLabel, { color: '#10B981' }]}>Check In</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.actionBtn, { backgroundColor: '#EF444420', borderColor: '#EF4444' }]}
+          style={[styles.actionBtn, { backgroundColor: '#EF444420', borderColor: colors.danger }]}
           onPress={() => navigation.navigate('AttendanceCamera', { mode: 'checkout' })}
         >
           <Text style={styles.actionIcon}>🚪</Text>
           <Text style={[styles.actionLabel, { color: '#EF4444' }]}>Check Out</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.actionBtn, { backgroundColor: '#6C63FF20', borderColor: '#6C63FF' }]}
+          style={[styles.actionBtn, { backgroundColor: '#6C63FF20', borderColor: colors.primary }]}
           onPress={() => navigation.navigate('AddEmployee')}
         >
           <Text style={styles.actionIcon}>➕</Text>
@@ -141,38 +142,34 @@ const DashboardScreen: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0D0D1A' },
-  loader: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0D0D1A' },
+  container: { flex: 1, backgroundColor: colors.bg },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, paddingTop: 50 },
-  greeting: { fontSize: 22, fontWeight: '800', color: '#F0F0F5' },
-  subtitle: { fontSize: 13, color: '#9090A0', marginTop: 2 },
-  logoutBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#1C1C2E', justifyContent: 'center', alignItems: 'center' },
+  greeting: { fontSize: 22, fontWeight: '800', color: colors.text },
+  subtitle: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+  logoutBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surface, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: colors.border },
   logoutText: { fontSize: 18 },
-  dateText: { color: '#9090A0', fontSize: 13, paddingHorizontal: 20, marginBottom: 16 },
+  dateText: { color: colors.textMuted, fontSize: 13, paddingHorizontal: 20, marginBottom: 16 },
   banner: {
     margin: 20,
-    backgroundColor: '#6C63FF',
-    borderRadius: 20,
+    backgroundColor: colors.primary,
+    borderRadius: radii.lg,
     padding: 24,
     alignItems: 'center',
-    shadowColor: '#6C63FF',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 20,
-    elevation: 12,
+    ...shadow,
   },
   bannerRate: { fontSize: 48, fontWeight: '900', color: '#fff' },
   bannerLabel: { fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 4 },
   bannerDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#10B981', marginTop: 12 },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12 },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, marginTop: 2 },
   statCard: {
-    width: '30%', marginHorizontal: '1.5%', marginVertical: 6, backgroundColor: '#1C1C2E', borderRadius: 16, padding: 16,
+    width: '30%', marginHorizontal: '1.5%', marginVertical: 6, backgroundColor: colors.surface, borderRadius: radii.md, padding: 16,
     borderLeftWidth: 3, alignItems: 'center' as const,
   },
   statIcon: { fontSize: 22, marginBottom: 6 },
   statValue: { fontSize: 24, fontWeight: '800' },
-  statTitle: { fontSize: 11, color: '#9090A0', marginTop: 4, textAlign: 'center' },
-  sectionTitle: { fontSize: 17, fontWeight: '700', color: '#F0F0F5', paddingHorizontal: 20, marginTop: 8, marginBottom: 12 },
+  statTitle: { fontSize: 11, color: colors.textMuted, marginTop: 4, textAlign: 'center' },
+  sectionTitle: { fontSize: 17, fontWeight: '700', color: colors.text, paddingHorizontal: 20, marginTop: 8, marginBottom: 12 },
   actionsRow: { flexDirection: 'row', paddingHorizontal: 12, paddingBottom: 30, gap: 8 },
   actionBtn: {
     flex: 1, borderRadius: 16, borderWidth: 1, padding: 16, alignItems: 'center',

@@ -16,6 +16,7 @@ import { registerFaceEmbedding } from '../utils/faceUtils';
 import { MULTIPART_RETRY_AFTER_AUTH } from '../services/api';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
+import { colors, radii, shadow } from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'FaceRegister'>;
 
@@ -119,7 +120,7 @@ const FaceRegisterScreen: React.FC<Props> = ({ navigation, route }) => {
   if (!device) {
     return (
       <View style={styles.permissionContainer}>
-        <ActivityIndicator size="large" color="#6C63FF" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.permissionText}>Loading camera...</Text>
       </View>
     );
@@ -196,20 +197,24 @@ const styles = StyleSheet.create({
   },
   topBar: {
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 16,
+    backgroundColor: 'rgba(17,24,39,0.75)',
+    borderRadius: radii.lg,
     padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   employeeName: { color: '#fff', fontSize: 20, fontWeight: '700' },
-  employeeId: { color: '#6C63FF', fontSize: 14, marginTop: 4 },
+  employeeId: { color: colors.primary, fontSize: 14, marginTop: 4 },
   instructions: {
     color: '#fff',
     textAlign: 'center',
     fontSize: 16,
     lineHeight: 24,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 12,
+    backgroundColor: 'rgba(17,24,39,0.78)',
+    borderRadius: radii.md,
     padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
   },
   progressRow: { flexDirection: 'row', gap: 12 },
   progressDot: {
@@ -218,7 +223,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.3)',
   },
-  progressDotFilled: { backgroundColor: '#6C63FF' },
+  progressDotFilled: { backgroundColor: colors.primary },
   captureBtn: {
     width: 80,
     height: 80,
@@ -235,7 +240,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0D0D1A',
+    backgroundColor: colors.bg,
     padding: 40,
     gap: 16,
   },
@@ -254,15 +259,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   permissionBtn: {
-    backgroundColor: '#6C63FF',
-    borderRadius: 14,
+    backgroundColor: colors.primary,
+    borderRadius: radii.md,
     paddingHorizontal: 32,
     paddingVertical: 16,
-    shadowColor: '#6C63FF',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    ...shadow,
   },
   permissionBtnText: { color: '#fff', fontWeight: '800', fontSize: 16 },
 });

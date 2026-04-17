@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { colors, radii } from '../theme';
 
 export interface Employee {
   _id: string;
@@ -57,14 +58,14 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1C1C2E',
-    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radii.md,
     padding: 16,
     marginVertical: 6,
     marginHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#2D2D3F',
-    shadowColor: '#6C63FF',
+    borderColor: colors.border,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#6C63FF',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -88,17 +89,17 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   name: {
-    color: '#F0F0F5',
+    color: colors.text,
     fontSize: 16,
     fontWeight: '700',
   },
   dept: {
-    color: '#9090A0',
+    color: colors.textMuted,
     fontSize: 13,
     marginTop: 2,
   },
   id: {
-    color: '#6C63FF',
+    color: colors.primary,
     fontSize: 12,
     marginTop: 2,
     fontWeight: '600',
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   registerBtn: {
-    backgroundColor: '#6C63FF',
+    backgroundColor: colors.primary,
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 4,

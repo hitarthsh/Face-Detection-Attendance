@@ -3,6 +3,7 @@ import { Text, View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { colors } from '../theme';
 
 import LoginScreen from '../screens/LoginScreen';
 import DashboardScreen from '../screens/DashboardScreen';
@@ -41,13 +42,14 @@ const MainTabs = () => (
     screenOptions={({ route }) => ({
       headerShown: false,
       tabBarStyle: {
-        backgroundColor: '#1C1C2E',
-        borderTopColor: '#2D2D3F',
-        height: 65,
+        backgroundColor: colors.surface,
+        borderTopColor: colors.border,
+        height: 70,
         paddingBottom: 10,
+        paddingTop: 8,
       },
-      tabBarActiveTintColor: '#6C63FF',
-      tabBarInactiveTintColor: '#888',
+      tabBarActiveTintColor: colors.primary,
+      tabBarInactiveTintColor: colors.textMuted,
       tabBarLabelStyle: { fontSize: 12, fontWeight: '600' as const },
       tabBarIcon: ({ color, size }: { color: string; size: number }) => (
         <Text style={{ fontSize: size - 4, color }}>{TAB_ICONS[route.name] ?? '•'}</Text>
@@ -98,8 +100,8 @@ const AppNavigator = () => {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0D0D1A', justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#6C63FF" />
+      <View style={{ flex: 1, backgroundColor: colors.bg, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -109,8 +111,8 @@ const AppNavigator = () => {
       <Stack.Navigator
         initialRouteName={isAuthenticated ? 'Main' : 'Login'}
         screenOptions={{
-          headerStyle: { backgroundColor: '#1C1C2E' },
-          headerTintColor: '#fff',
+          headerStyle: { backgroundColor: colors.surface },
+          headerTintColor: colors.text,
           headerTitleStyle: { fontWeight: '700' as const },
           headerShadowVisible: false,
           animation: 'slide_from_right',
