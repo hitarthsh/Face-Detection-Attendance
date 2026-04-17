@@ -21,8 +21,21 @@ const validateLogin = [
   body('password').notEmpty().withMessage('Password is required'),
 ];
 
+const validateForgotPassword = [
+  body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
+];
+
+const validateResetPassword = [
+  body('token').isString().trim().notEmpty().withMessage('Reset token is required'),
+  body('newPassword')
+    .isLength({ min: 8 })
+    .withMessage('New password must be at least 8 characters'),
+];
+
 router.post('/register', validateRegister, validate, authController.register);
 router.post('/login', validateLogin, validate, authController.login);
+router.post('/forgot-password', validateForgotPassword, validate, authController.forgotPassword);
+router.post('/reset-password', validateResetPassword, validate, authController.resetPassword);
 router.post('/refresh', authController.refreshToken);
 router.post('/logout', authenticate, authController.logout);
 router.get('/profile', authenticate, authController.getProfile);

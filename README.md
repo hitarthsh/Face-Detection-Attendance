@@ -188,10 +188,17 @@ All API endpoints are mounted under `/api`.
 ```
 POST   /api/auth/login          Login → returns JWT tokens
 POST   /api/auth/register       Register admin user
+POST   /api/auth/forgot-password Request password reset token
+POST   /api/auth/reset-password  Reset password using token
 POST   /api/auth/refresh        Refresh access token
 POST   /api/auth/logout         Logout (requires auth)
 GET    /api/auth/profile        Get current user
 ```
+
+Password reset notes:
+- `POST /api/auth/forgot-password` always returns a generic success message.
+- In `NODE_ENV=development`, response includes `data.resetToken` (for local/testing).
+- `POST /api/auth/reset-password` expects `{ token, newPassword }`.
 
 ### Employees *(requires auth; admin for create/update/delete)*
 ```
